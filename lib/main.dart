@@ -1,10 +1,8 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:signature/signature.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:intl/intl.dart';
@@ -261,7 +259,6 @@ class _NotesDashboardState extends State<NotesDashboard> {
       ),
       body: Column(
         children: [
-          // Folder chips
           SizedBox(
             height: 44,
             child: ListView.builder(
@@ -285,7 +282,6 @@ class _NotesDashboardState extends State<NotesDashboard> {
               },
             ),
           ),
-          // Notes list/grid
           Expanded(
             child: _filtered.isEmpty
                 ? Center(
@@ -341,8 +337,6 @@ class _NotesDashboardState extends State<NotesDashboard> {
     );
   }
 }
-
-// ── Note Card ──────────────────────────────────────────────────────────────────
 
 class _NoteCard extends StatelessWidget {
   final NoteModel note;
@@ -442,8 +436,6 @@ class _NoteCard extends StatelessWidget {
   }
 }
 
-// ── Editor ─────────────────────────────────────────────────────────────────────
-
 class Editor extends StatefulWidget {
   final NoteModel? existing;
   const Editor({super.key, this.existing});
@@ -485,8 +477,6 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  // ── Save ────────────────────────────────────────────────────────────────────
-
   void _save() {
     final plain = _contentCtrl.text.trim();
     final existing = widget.existing;
@@ -513,35 +503,6 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
 
     Navigator.pop(context, note);
   }
-
-  // ── Image ────────────────────────────────────────────────────────────────────
-
-  Future<void> _insertImage(ImageSource src) async {
-    final img = await ImagePicker().pickImage(source: src);
-    if (img == null) return;
-    
-    final bytes = await File(img.path).readAsBytes();
-    final b64 = base64Encode(bytes);
-    
-    // Show image in a dialog
-    if (!mounted) return;
-    showDialog(
-      context: context,
-      builder: (_) => Dialog(
-        child: Image.memory(bytes),
-      ),
-    );
-
-    // Add image reference to note
-    final idx = _contentCtrl.selection.baseOffset < 0
-        ? 0
-        : _contentCtrl.selection.baseOffset;
-    _contentCtrl.text = _contentCtrl.text.substring(0, idx) +
-        '\n[Image inserted - ${DateTime.now().toIso8601String()}]\n' +
-        _contentCtrl.text.substring(idx);
-  }
-
-  // ── PDF ──────────────────────────────────────────────────────────────────────
 
   Future<void> _exportPDF() async {
     final doc = pw.Document();
@@ -581,8 +542,6 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
     await Printing.layoutPdf(onLayout: (_) async => doc.save());
   }
 
-  // ── History ──────────────────────────────────────────────────────────────────
-
   void _showHistory() {
     final history = widget.existing?.history ?? [];
     if (history.isEmpty) {
@@ -612,8 +571,6 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
       ),
     );
   }
-
-  // ── Build ────────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -656,43 +613,18 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
       body: TabBarView(
         controller: _tabs,
         children: [
-          // ── Tab 1: Write ─────────────────────────────────────────────────────
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.image_outlined),
-                      onPressed: () => _insertImage(ImageSource.gallery),
-                      tooltip: 'Insert image from gallery',
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.camera_alt_outlined),
-                      onPressed: () => _insertImage(ImageSource.camera),
-                      tooltip: 'Take a photo',
-                    ),
-                  ],
-                ),
+          Expanded(
+            child: TextField(
+              controller: _contentCtrl,
+              maxLines: null,
+              expands: true,
+              decoration: const InputDecoration(
+                hintText: 'Start writing your note...',
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.all(16),
               ),
-              const Divider(height: 1),
-              Expanded(
-                child: TextField(
-                  controller: _contentCtrl,
-                  maxLines: null,
-                  expands: true,
-                  decoration: const InputDecoration(
-                    hintText: 'Start writing your note...',
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.all(16),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-
-          // ── Tab 2: Draw ──────────────────────────────────────────────────────
           Column(
             children: [
               Padding(
@@ -709,7 +641,7 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
                       onPressed: () async {
                         final bytes = await _sign.toPngBytes();
                         if (bytes == null) return;
-                        
+
                         showDialog(
                           context: context,
                           builder: (_) => Dialog(
@@ -746,8 +678,6 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
               ),
             ],
           ),
-
-          // ── Tab 3: Meta ──────────────────────────────────────────────────────
           ListView(
             padding: const EdgeInsets.all(16),
             children: [
