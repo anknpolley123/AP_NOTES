@@ -14,9 +14,6 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0"
-        
-        // Force Android v2 embedding
-        multiDexEnabled true
     }
 
     compileOptions {
@@ -32,17 +29,8 @@ android {
         release {
             minifyEnabled false
             shrinkResources false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    
-    packagingOptions {
-        exclude 'META-INF/proguard/androidx-*.pro'
-    }
-}
-
-dependencies {
-    implementation 'androidx.multidex:multidex:2.0.1'
 }
 
 flutter {
