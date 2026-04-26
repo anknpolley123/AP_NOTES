@@ -14,6 +14,9 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0"
+        
+        // Force Android v2 embedding
+        multiDexEnabled true
     }
 
     compileOptions {
@@ -29,46 +32,17 @@ android {
         release {
             minifyEnabled false
             shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    
+    packagingOptions {
+        exclude 'META-INF/proguard/androidx-*.pro'
+    }
 }
 
-flutter {
-    source "../."
-}
-plugins {
-    id "com.android.application"
-    id "kotlin-android"
-    id "dev.flutter.flutter-gradle-plugin"
-}
-
-android {
-    namespace "com.example.kali_note_app"
-    compileSdk 34
-
-    defaultConfig {
-        applicationId "com.example.kali_note_app"
-        minSdk 21
-        targetSdk 34
-        versionCode 1
-        versionName "1.0"
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            shrinkResources false
-        }
-    }
+dependencies {
+    implementation 'androidx.multidex:multidex:2.0.1'
 }
 
 flutter {
