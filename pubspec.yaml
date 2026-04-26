@@ -12,8 +12,8 @@ dependencies:
 
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.2.0
-  image_picker: ^0.8.7+4
-  device_info_plus: ^9.0.0
+  image_picker: ^0.8.9
+  device_info_plus: ^9.1.0
   signature: ^5.3.0
   pdf: ^3.10.0
   printing: ^5.10.0
