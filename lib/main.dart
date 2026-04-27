@@ -3,12 +3,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:signature/signature.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
-import 'package:intl/intl.dart';
-import 'package:file_picker/file_picker.dart';
 
 void main() {
   runApp(const MyApp());
