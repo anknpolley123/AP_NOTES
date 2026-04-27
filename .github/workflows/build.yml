@@ -1,47 +1,51 @@
 name: Build APK
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+push:
+branches:
+- main
+workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+build:
+runs-on: ubuntu-latest
 
-    env:
-      GRADLE_OPTS: "-Dorg.gradle.vfs.watch=false"
+env:
+  GRADLE_OPTS: "-Dorg.gradle.vfs.watch=false"
 
-    steps:
-      - uses: actions/checkout@v3
+steps:
+  - uses: actions/checkout@v3
 
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
+  - uses: actions/setup-java@v3
+    with:
+      distribution: 'temurin'
+      java-version: '17'
 
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.22.0'
+  - uses: subosito/flutter-action@v2
+    with:
+      flutter-version: '3.22.0'
 
-      - run: flutter doctor
+  - run: flutter doctor
 
-      - run: flutter clean
+  - run: flutter clean
 
-      # 🔥 FORCE disable watcher at runtime
-      - run: echo "org.gradle.vfs.watch=false" >> android/gradle.properties
+  # Disable Gradle watcher (fix CI bug)
+  - run: echo "org.gradle.vfs.watch=false" >> android/gradle.properties
 
-      # 🔥 REMOVE old android build cache completely
-      - run: rm -rf android/.gradle
-      - run: rm -rf build
+  # Clean caches
+  - run: rm -rf android/.gradle
+  - run: rm -rf build
 
-      - run: flutter pub get
+  - run: flutter pub get
 
-      # 🔥 Build using split-per-abi (more stable in CI)
-      - run: flutter build apk --release --split-per-abi
+  # Build APK (stable mode)
+  - run: flutter build apk --release --split-per-abi --no-tree-shake-icons
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: apk
-          path: build/app/outputs/flutter-apk/
+  # Show all generated files (VERY IMPORTANT)
+  - run: find build -type f
+
+  # Upload APKs
+  - uses: actions/upload-artifact@v4
+    with:
+      name: apk
+      path: build/app/outputs/
