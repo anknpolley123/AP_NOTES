@@ -8,8 +8,8 @@
 
     <application
         android:label="AP NOTES"
-        android:icon="@android:drawable/sym_def_app_icon"
-        android:debuggable="false">
+        android:icon="@android:drawable/sym_def_app_icon">
+        
 
         <activity
             android:name=".MainActivity"
