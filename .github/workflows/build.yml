@@ -1,53 +1,49 @@
-name: Build AP_NOTES APK
+name: Build APK
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Get your code
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
+      # 2. Setup Java (required for Android build)
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
 
+      # 3. Setup Flutter
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.5'
-          channel: 'stable'
-          cache: false
+          flutter-version: '3.22.0'
+          cache: true
 
-      - name: Clean and get dependencies
-        run: |
-          flutter clean
-          flutter pub get
+      # 4. Install dependencies
+      - name: Install dependencies
+        run: flutter pub get
 
+      # 5. Clean project (VERY important)
+      - name: Clean build
+        run: flutter clean
+
+      # 6. Build APK
       - name: Build APK
         run: flutter build apk --release
 
+      # 7. Upload APK file
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: AP_NOTES.apk
+          name: app-release
           path: build/app/outputs/flutter-apk/app-release.apk
-
-      - name: Create Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ github.run_number }}
-          release_name: AP_NOTES Build #${{ github.run_number }}
-          body: |
-            ✅ APK built successfully!
-            Build #${{ github.run_number }}
-          draft: false
-          prerelease: false
