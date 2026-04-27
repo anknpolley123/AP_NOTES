@@ -1,42 +1,98 @@
 import 'dart:convert';
-
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:signature/signature.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:intl/intl.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+const String GEMINI_API_KEY = 'AIzaSyDemP8-WKTz1rrE7T8-f5QJLqYGMJj9YqY';
+
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool _darkMode = false;
+  bool _focusMode = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadThemePreference();
+  }
+
+  Future<void> _loadThemePreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _darkMode = prefs.getBool('darkMode') ?? false;
+    });
+  }
+
+  void _toggleTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _darkMode = !_darkMode;
+    });
+    await prefs.setBool('darkMode', _darkMode);
+  }
+
+  void _toggleFocusMode() {
+    setState(() {
+      _focusMode = !_focusMode;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'AP NOTES',
       debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.system,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      themeMode: _darkMode ? ThemeMode.dark : ThemeMode.light,
+      theme: _buildLightTheme(),
+      darkTheme: _buildDarkTheme(),
+      home: NotesDashboard(
+        onToggleTheme: _toggleTheme,
+        onToggleFocusMode: _toggleFocusMode,
+        focusMode: _focusMode,
       ),
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          brightness: Brightness.dark,
-        ),
+    );
+  }
+
+  ThemeData _buildLightTheme() {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.light,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: const Color(0xFFD32F2F),
+        brightness: Brightness.light,
       ),
-      home: const NotesDashboard(),
+    );
+  }
+
+  ThemeData _buildDarkTheme() {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: const Color(0xFFD32F2F),
+        brightness: Brightness.dark,
+      ),
     );
   }
 }
 
-// ── Model ──────────────────────────────────────────────────────────────────────
+// ==================== MODELS ====================
 
 class NoteModel {
   String id;
@@ -48,6 +104,10 @@ class NoteModel {
   DateTime updatedAt;
   bool isPinned;
   List<String> history;
+  List<String> linkedNotes;
+  String? pdfPath;
+  List<PDFAnnotation> annotations;
+  bool isInfiniteCanvas;
 
   NoteModel({
     required this.id,
@@ -59,10 +119,16 @@ class NoteModel {
     DateTime? updatedAt,
     this.isPinned = false,
     List<String>? history,
+    List<String>? linkedNotes,
+    this.pdfPath,
+    List<PDFAnnotation>? annotations,
+    this.isInfiniteCanvas = false,
   })  : tags = tags ?? [],
         createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now(),
-        history = history ?? [];
+        history = history ?? [],
+        linkedNotes = linkedNotes ?? [],
+        annotations = annotations ?? [];
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -74,6 +140,10 @@ class NoteModel {
         'updatedAt': updatedAt.toIso8601String(),
         'isPinned': isPinned,
         'history': history,
+        'linkedNotes': linkedNotes,
+        'pdfPath': pdfPath,
+        'annotations': annotations.map((a) => a.toJson()).toList(),
+        'isInfiniteCanvas': isInfiniteCanvas,
       };
 
   factory NoteModel.fromJson(Map<String, dynamic> j) => NoteModel(
@@ -86,13 +156,69 @@ class NoteModel {
         updatedAt: DateTime.tryParse(j['updatedAt'] ?? '') ?? DateTime.now(),
         isPinned: j['isPinned'] ?? false,
         history: List<String>.from(j['history'] ?? []),
+        linkedNotes: List<String>.from(j['linkedNotes'] ?? []),
+        pdfPath: j['pdfPath'],
+        annotations: (j['annotations'] as List?)
+                ?.map((a) => PDFAnnotation.fromJson(a))
+                .toList() ??
+            [],
+        isInfiniteCanvas: j['isInfiniteCanvas'] ?? false,
       );
 }
 
-// ── Dashboard ──────────────────────────────────────────────────────────────────
+class PDFAnnotation {
+  String id;
+  String text;
+  int pageNumber;
+  double xOffset;
+  double yOffset;
+  String annotationType;
+  DateTime createdAt;
+
+  PDFAnnotation({
+    required this.id,
+    required this.text,
+    required this.pageNumber,
+    this.xOffset = 0,
+    this.yOffset = 0,
+    this.annotationType = 'highlight',
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'text': text,
+        'pageNumber': pageNumber,
+        'xOffset': xOffset,
+        'yOffset': yOffset,
+        'annotationType': annotationType,
+        'createdAt': createdAt.toIso8601String(),
+      };
+
+  factory PDFAnnotation.fromJson(Map<String, dynamic> j) => PDFAnnotation(
+        id: j['id'] ?? '',
+        text: j['text'] ?? '',
+        pageNumber: j['pageNumber'] ?? 0,
+        xOffset: j['xOffset'] ?? 0,
+        yOffset: j['yOffset'] ?? 0,
+        annotationType: j['annotationType'] ?? 'highlight',
+        createdAt: DateTime.tryParse(j['createdAt'] ?? '') ?? DateTime.now(),
+      );
+}
+
+// ==================== DASHBOARD ====================
 
 class NotesDashboard extends StatefulWidget {
-  const NotesDashboard({super.key});
+  final VoidCallback onToggleTheme;
+  final VoidCallback onToggleFocusMode;
+  final bool focusMode;
+
+  const NotesDashboard({
+    super.key,
+    required this.onToggleTheme,
+    required this.onToggleFocusMode,
+    required this.focusMode,
+  });
 
   @override
   State<NotesDashboard> createState() => _NotesDashboardState();
@@ -149,7 +275,7 @@ class _NotesDashboardState extends State<NotesDashboard> {
 
   Future<void> _load() async {
     final p = await SharedPreferences.getInstance();
-    final raw = p.getStringList('notes_v2') ?? [];
+    final raw = p.getStringList('notes_v3') ?? [];
     _notes = raw.map((e) => NoteModel.fromJson(jsonDecode(e))).toList();
     _applyFilter();
   }
@@ -157,7 +283,7 @@ class _NotesDashboardState extends State<NotesDashboard> {
   Future<void> _saveAll() async {
     final p = await SharedPreferences.getInstance();
     await p.setStringList(
-        'notes_v2', _notes.map((n) => jsonEncode(n.toJson())).toList());
+        'notes_v3', _notes.map((n) => jsonEncode(n.toJson())).toList());
   }
 
   Future<void> _upsertNote(NoteModel note) async {
@@ -185,53 +311,78 @@ class _NotesDashboardState extends State<NotesDashboard> {
   Future<void> _openEditor({NoteModel? note}) async {
     final result = await Navigator.push<NoteModel>(
       context,
-      MaterialPageRoute(builder: (_) => Editor(existing: note)),
+      MaterialPageRoute(
+        builder: (_) => Editor(
+          existing: note,
+          onToggleFocusMode: widget.onToggleFocusMode,
+          focusMode: widget.focusMode,
+        ),
+      ),
     );
     if (result != null) await _upsertNote(result);
   }
 
-  Future<void> _addFolder() async {
-    final ctrl = TextEditingController();
-    final name = await showDialog<String>(
+  void _showCommandPalette() {
+    showSearch(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('New Folder'),
-        content: TextField(
-          controller: ctrl,
-          decoration: const InputDecoration(hintText: 'Folder name'),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel')),
-          ElevatedButton(
-              onPressed: () => Navigator.pop(context, ctrl.text.trim()),
-              child: const Text('Create')),
-        ],
+      delegate: CommandPaletteDelegate(
+        notes: _notes,
+        onNoteSelected: _openEditor,
+        onCreateNew: () => _openEditor(),
+        onToggleDarkMode: widget.onToggleTheme,
       ),
     );
-    if (name != null && name.isNotEmpty) {
-      setState(() => _selectedFolder = name);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    if (widget.focusMode) {
+      return Scaffold(
+        body: _buildNotesList(),
+        floatingActionButton: FloatingActionButton(
+          mini: true,
+          onPressed: () => _openEditor(),
+          child: const Icon(Icons.add),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: scheme.primary,
-        foregroundColor: scheme.onPrimary,
-        title: const Text('AP NOTES',
-            style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 2)),
+        elevation: 0,
+        backgroundColor: scheme.surface,
+        foregroundColor: scheme.onSurface,
+        title: const Row(
+          children: [
+            Icon(Icons.note_outlined, size: 32),
+            SizedBox(width: 8),
+            Text('AP NOTES',
+                style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 2)),
+          ],
+        ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: _showCommandPalette,
+            tooltip: 'Command Palette',
+          ),
           IconButton(
             icon: Icon(_gridView ? Icons.list : Icons.grid_view),
             onPressed: () => setState(() => _gridView = !_gridView),
+            tooltip: 'Toggle View',
           ),
           IconButton(
-            icon: const Icon(Icons.create_new_folder_outlined),
-            onPressed: _addFolder,
+            icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+            onPressed: widget.onToggleTheme,
+            tooltip: 'Toggle Theme',
+          ),
+          IconButton(
+            icon: const Icon(Icons.fullscreen),
+            onPressed: widget.onToggleFocusMode,
+            tooltip: 'Focus Mode',
           ),
         ],
         bottom: PreferredSize(
@@ -240,18 +391,25 @@ class _NotesDashboardState extends State<NotesDashboard> {
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
             child: TextField(
               controller: _search,
-              style: TextStyle(color: scheme.onPrimary),
               decoration: InputDecoration(
-                hintText: 'Search notes, tags...',
-                hintStyle:
-                    TextStyle(color: scheme.onPrimary.withOpacity(0.6)),
-                prefixIcon: Icon(Icons.search, color: scheme.onPrimary),
-                filled: true,
-                fillColor: scheme.primary.withOpacity(0.3),
+                hintText: 'Search notes...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _search.clear();
+                          setState(() => _searchQuery = '');
+                        },
+                      )
+                    : null,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
+                filled: true,
+                fillColor: scheme.surfaceContainerHighest,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
               ),
             ),
           ),
@@ -259,174 +417,153 @@ class _NotesDashboardState extends State<NotesDashboard> {
       ),
       body: Column(
         children: [
-          SizedBox(
-            height: 44,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-              itemCount: _folders.length,
-              itemBuilder: (_, i) {
-                final f = _folders[i];
-                return Padding(
-                  padding: const EdgeInsets.only(right: 6),
-                  child: ChoiceChip(
-                    label: Text(f),
-                    selected: _selectedFolder == f,
-                    onSelected: (_) {
-                      setState(() => _selectedFolder = f);
-                      _applyFilter();
-                    },
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+            child: Row(
+              children: [
+                for (final folder in _folders)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: FilterChip(
+                      label: Text(folder),
+                      selected: _selectedFolder == folder,
+                      onSelected: (_) {
+                        setState(() => _selectedFolder = folder);
+                        _applyFilter();
+                      },
+                    ),
                   ),
-                );
-              },
+              ],
             ),
           ),
-          Expanded(
-            child: _filtered.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.note_outlined,
-                            size: 64,
-                            color: scheme.onSurface.withOpacity(0.3)),
-                        const SizedBox(height: 12),
-                        Text('No notes found',
-                            style: TextStyle(
-                                color: scheme.onSurface.withOpacity(0.5))),
-                      ],
-                    ),
-                  )
-                : _gridView
-                    ? GridView.builder(
-                        padding: const EdgeInsets.all(8),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8,
-                          childAspectRatio: 0.85,
-                        ),
-                        itemCount: _filtered.length,
-                        itemBuilder: (_, i) => _NoteCard(
-                          note: _filtered[i],
-                          onTap: () => _openEditor(note: _filtered[i]),
-                          onDelete: () => _deleteNote(_filtered[i].id),
-                          onPin: () => _togglePin(_filtered[i]),
-                        ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(8),
-                        itemCount: _filtered.length,
-                        itemBuilder: (_, i) => _NoteCard(
-                          note: _filtered[i],
-                          onTap: () => _openEditor(note: _filtered[i]),
-                          onDelete: () => _deleteNote(_filtered[i].id),
-                          onPin: () => _togglePin(_filtered[i]),
-                        ),
-                      ),
+          Expanded(child: _buildNotesList()),
+        ],
+      ),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton.extended(
+            onPressed: () => _openEditor(),
+            icon: const Icon(Icons.add),
+            label: const Text('New Note'),
+            tooltip: 'Create new note',
+          ),
+          const SizedBox(height: 12),
+          FloatingActionButton(
+            mini: true,
+            onPressed: () async {
+              final result = await FilePicker.platform.pickFiles(
+                type: FileType.custom,
+                allowedExtensions: ['pdf'],
+              );
+              if (result != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('PDF import feature in beta')),
+                );
+              }
+            },
+            tooltip: 'Import PDF',
+            child: const Icon(Icons.picture_as_pdf),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _openEditor(),
-        icon: const Icon(Icons.add),
-        label: const Text('New Note'),
-      ),
     );
   }
-}
 
-class _NoteCard extends StatelessWidget {
-  final NoteModel note;
-  final VoidCallback onTap;
-  final VoidCallback onDelete;
-  final VoidCallback onPin;
+  Widget _buildNotesList() {
+    if (_filtered.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.note_outlined, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            const Text('No notes yet', style: TextStyle(fontSize: 18)),
+            const SizedBox(height: 8),
+            const Text('Create your first note to get started'),
+          ],
+        ),
+      );
+    }
 
-  const _NoteCard({
-    required this.note,
-    required this.onTap,
-    required this.onDelete,
-    required this.onPin,
-  });
+    if (_gridView) {
+      return GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 0.85,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+        ),
+        padding: const EdgeInsets.all(8),
+        itemCount: _filtered.length,
+        itemBuilder: (_, i) => _buildNoteCard(_filtered[i]),
+      );
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final fmt = DateFormat('MMM d, yyyy');
-    return Card(
-      elevation: note.isPinned ? 4 : 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: note.isPinned
-            ? BorderSide(color: scheme.primary, width: 2)
-            : BorderSide.none,
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+    return ListView.builder(
+      itemCount: _filtered.length,
+      itemBuilder: (_, i) => _buildNoteListItem(_filtered[i]),
+    );
+  }
+
+  Widget _buildNoteCard(NoteModel note) {
+    return GestureDetector(
+      onTap: () => _openEditor(note: note),
+      onLongPress: () => _showNoteMenu(note),
+      child: Card(
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: Text(
                       note.title.isEmpty ? 'Untitled' : note.title,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 15),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 14),
                     ),
                   ),
-                  if (note.isPinned)
-                    Icon(Icons.push_pin, size: 14, color: scheme.primary),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                note.content,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    fontSize: 12,
-                    color: scheme.onSurface.withOpacity(0.6)),
-              ),
-              const Spacer(),
-              if (note.tags.isNotEmpty)
-                Wrap(
-                  spacing: 4,
-                  children: note.tags
-                      .take(3)
-                      .map((t) => Chip(
-                            label: Text(t,
-                                style: const TextStyle(fontSize: 9)),
-                            padding: EdgeInsets.zero,
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                          ))
-                      .toList(),
-                ),
-              Row(
-                children: [
-                  Text(
-                    fmt.format(note.updatedAt),
-                    style: TextStyle(
-                        fontSize: 10,
-                        color: scheme.onSurface.withOpacity(0.4)),
+                  IconButton(
+                    icon: Icon(
+                      note.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+                      size: 16,
+                    ),
+                    onPressed: () => _togglePin(note),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
                   ),
-                  const Spacer(),
-                  InkWell(
-                      onTap: onPin,
-                      child: const Icon(Icons.push_pin_outlined, size: 16)),
-                  const SizedBox(width: 4),
-                  InkWell(
-                      onTap: onDelete,
-                      child: const Icon(Icons.delete_outline, size: 16)),
                 ],
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: Text(
+                  note.content,
+                  maxLines: 4,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 4,
+                children: note.tags
+                    .take(2)
+                    .map((t) => Chip(
+                        label: Text(t),
+                        materialTapTargetSize:
+                            MaterialTapTargetSize.shrinkWrap))
+                    .toList(),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                DateFormat('MMM d, yyyy').format(note.updatedAt),
+                style: const TextStyle(fontSize: 10, color: Colors.grey),
               ),
             ],
           ),
@@ -434,58 +571,364 @@ class _NoteCard extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildNoteListItem(NoteModel note) {
+    return ListTile(
+      leading: note.isPinned ? const Icon(Icons.push_pin) : null,
+      title: Text(note.title.isEmpty ? 'Untitled' : note.title),
+      subtitle: Text(
+        note.content.length > 60
+            ? '${note.content.substring(0, 60)}...'
+            : note.content,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      trailing: PopupMenuButton(
+        itemBuilder: (ctx) => [
+          PopupMenuItem(
+            onTap: () => _togglePin(note),
+            child: Row(
+              children: [
+                Icon(note.isPinned ? Icons.push_pin : Icons.push_pin_outlined),
+                const SizedBox(width: 8),
+                Text(note.isPinned ? 'Unpin' : 'Pin'),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            onTap: () => _openEditor(note: note),
+            child: const Row(
+              children: [
+                Icon(Icons.edit),
+                SizedBox(width: 8),
+                Text('Edit'),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            onTap: () => _deleteNote(note.id),
+            child: const Row(
+              children: [
+                Icon(Icons.delete, color: Colors.red),
+                SizedBox(width: 8),
+                Text('Delete', style: TextStyle(color: Colors.red)),
+              ],
+            ),
+          ),
+        ],
+      ),
+      onTap: () => _openEditor(note: note),
+    );
+  }
+
+  void _showNoteMenu(NoteModel note) {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.edit),
+            title: const Text('Edit'),
+            onTap: () {
+              Navigator.pop(context);
+              _openEditor(note: note);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete),
+            title: const Text('Delete'),
+            onTap: () {
+              Navigator.pop(context);
+              _deleteNote(note.id);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.share),
+            title: const Text('Share'),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
 }
+
+// ==================== COMMAND PALETTE ====================
+
+class CommandPaletteDelegate extends SearchDelegate {
+  final List<NoteModel> notes;
+  final Function(NoteModel?) onNoteSelected;
+  final VoidCallback onCreateNew;
+  final VoidCallback onToggleDarkMode;
+
+  CommandPaletteDelegate({
+    required this.notes,
+    required this.onNoteSelected,
+    required this.onCreateNew,
+    required this.onToggleDarkMode,
+  });
+
+  @override
+  String get searchFieldLabel => 'Search notes or commands...';
+
+  @override
+  ThemeData appBarTheme(BuildContext context) {
+    return Theme.of(context);
+  }
+
+  @override
+  List<Widget>? buildActions(BuildContext context) => [
+        if (query.isNotEmpty)
+          IconButton(
+            icon: const Icon(Icons.clear),
+            onPressed: () => query = '',
+          ),
+      ];
+
+  @override
+  Widget buildLeading(BuildContext context) => IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => close(context, null),
+      );
+
+  @override
+  Widget buildResults(BuildContext context) => _buildSuggestions(context);
+
+  @override
+  Widget buildSuggestions(BuildContext context) => _buildSuggestions(context);
+
+  Widget _buildSuggestions(BuildContext context) {
+    final q = query.toLowerCase();
+
+    final commands = [
+      ('Create new note', 'new', Icons.add),
+      ('Toggle dark mode', 'dark', Icons.dark_mode),
+      ('Export all as PDF', 'export', Icons.picture_as_pdf),
+      ('View all tags', 'tags', Icons.tag),
+    ];
+
+    final filteredCommands = commands
+        .where((c) => c.$0.toLowerCase().contains(q) || c.$1.contains(q))
+        .toList();
+
+    final filteredNotes = notes
+        .where((n) =>
+            n.title.toLowerCase().contains(q) ||
+            n.content.toLowerCase().contains(q) ||
+            n.tags.any((t) => t.toLowerCase().contains(q)))
+        .toList();
+
+    return ListView(
+      children: [
+        if (filteredCommands.isNotEmpty) ...[
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text('Commands',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          ),
+          for (final (name, cmd, icon) in filteredCommands)
+            ListTile(
+              leading: Icon(icon),
+              title: Text(name),
+              onTap: () {
+                close(context, null);
+                switch (cmd) {
+                  case 'new':
+                    onCreateNew();
+                    break;
+                  case 'dark':
+                    onToggleDarkMode();
+                    break;
+                }
+              },
+            ),
+          const Divider(),
+        ],
+        if (filteredNotes.isNotEmpty) ...[
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text('Notes',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          ),
+          for (final note in filteredNotes)
+            ListTile(
+              title: Text(note.title.isEmpty ? 'Untitled' : note.title),
+              subtitle: Text(
+                note.content.length > 50
+                    ? '${note.content.substring(0, 50)}...'
+                    : note.content,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              onTap: () {
+                close(context, null);
+                onNoteSelected(note);
+              },
+            ),
+        ],
+      ],
+    );
+  }
+}
+
+// ==================== EDITOR ====================
 
 class Editor extends StatefulWidget {
   final NoteModel? existing;
-  const Editor({super.key, this.existing});
+  final VoidCallback onToggleFocusMode;
+  final bool focusMode;
+
+  const Editor({
+    super.key,
+    this.existing,
+    required this.onToggleFocusMode,
+    required this.focusMode,
+  });
 
   @override
   State<Editor> createState() => _EditorState();
 }
 
-class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
-  final TextEditingController _contentCtrl = TextEditingController();
-  final SignatureController _sign =
-      SignatureController(penStrokeWidth: 3, penColor: Colors.black);
-
-  late TabController _tabs;
-  late TextEditingController _titleCtrl;
-  late TextEditingController _tagsCtrl;
-  late TextEditingController _folderCtrl;
+class _EditorState extends State<Editor> with TickerProviderStateMixin {
+  late final TabController _tabs;
+  late final TextEditingController _titleCtrl;
+  late final TextEditingController _contentCtrl;
+  late final TextEditingController _folderCtrl;
+  late final TextEditingController _tagsCtrl;
+  late final SignatureController _sign;
+  String? _selectedLayoutMode;
+  bool _showFormatToolbar = false;
 
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 3, vsync: this);
+    _tabs = TabController(length: 4, vsync: this);
     _titleCtrl = TextEditingController(text: widget.existing?.title ?? '');
-    _tagsCtrl =
-        TextEditingController(text: widget.existing?.tags.join(', ') ?? '');
-    _folderCtrl =
-        TextEditingController(text: widget.existing?.folder ?? 'General');
     _contentCtrl = TextEditingController(text: widget.existing?.content ?? '');
+    _folderCtrl = TextEditingController(text: widget.existing?.folder ?? '');
+    _tagsCtrl = TextEditingController(
+        text: (widget.existing?.tags ?? []).join(', '));
+    _sign = SignatureController(
+      penStrokeWidth: 2,
+      penColor: Colors.black,
+      exportBackgroundColor: Colors.white,
+    );
+    _selectedLayoutMode =
+        widget.existing?.isInfiniteCanvas ?? false ? 'infinite' : 'paged';
   }
 
   @override
   void dispose() {
     _tabs.dispose();
-    _sign.dispose();
     _titleCtrl.dispose();
-    _tagsCtrl.dispose();
-    _folderCtrl.dispose();
     _contentCtrl.dispose();
+    _folderCtrl.dispose();
+    _tagsCtrl.dispose();
+    _sign.dispose();
     super.dispose();
   }
 
+  Future<void> _generateAISummary() async {
+    try {
+      final content = _contentCtrl.text.trim();
+      if (content.isEmpty) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Generating summary...')),
+      );
+
+      final model = GenerativeModel(
+        model: 'gemini-pro',
+        apiKey: GEMINI_API_KEY,
+      );
+
+      final prompt = '''Summarize the following text in 5 bullet points:
+
+$content
+
+Format as bullet points only.''';
+
+      final response = await model.generateContent([Content.text(prompt)]);
+
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('AI Summary'),
+            content: SelectableText(response.text ?? 'No summary generated'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
+  Future<void> _generateAIExplanation(String selectedText) async {
+    try {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Generating explanation...')),
+      );
+
+      final model = GenerativeModel(
+        model: 'gemini-pro',
+        apiKey: GEMINI_API_KEY,
+      );
+
+      final prompt = '''Explain the following text in simple, layman\'s terms:
+
+$selectedText
+
+Keep it concise and easy to understand.''';
+
+      final response = await model.generateContent([Content.text(prompt)]);
+
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('AI Explanation'),
+            content: SelectableText(response.text ?? 'No explanation generated'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
   void _save() {
+    final title = _titleCtrl.text.trim();
     final plain = _contentCtrl.text.trim();
-    final existing = widget.existing;
+    final id =
+        widget.existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString();
 
     final note = NoteModel(
-      id: existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-      title: _titleCtrl.text.trim().isEmpty
-          ? (plain.length > 40 ? '${plain.substring(0, 40)}...' : plain)
-          : _titleCtrl.text.trim(),
+      id: id,
+      title: title.isEmpty ? 'Untitled' : title,
       content: plain,
       folder: _folderCtrl.text.trim().isEmpty
           ? 'General'
@@ -496,9 +939,10 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
           .where((t) => t.isNotEmpty)
           .toList(),
       updatedAt: DateTime.now(),
-      createdAt: existing?.createdAt ?? DateTime.now(),
-      isPinned: existing?.isPinned ?? false,
-      history: [plain, ...(existing?.history ?? [])].take(20).toList(),
+      createdAt: widget.existing?.createdAt ?? DateTime.now(),
+      isPinned: widget.existing?.isPinned ?? false,
+      history: [plain, ...(widget.existing?.history ?? [])].take(20).toList(),
+      isInfiniteCanvas: _selectedLayoutMode == 'infinite',
     );
 
     Navigator.pop(context, note);
@@ -530,7 +974,7 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
         footer: (ctx) => pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
-            pw.Text('AP NOTES — Ankon Polley',
+            pw.Text('AP NOTES — Advanced Note Taking',
                 style: const pw.TextStyle(fontSize: 10)),
             pw.Text('Page ${ctx.pageNumber}/${ctx.pagesCount}',
                 style: const pw.TextStyle(fontSize: 10)),
@@ -555,9 +999,10 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
         itemCount: history.length,
         itemBuilder: (_, i) {
           final ver = history[i];
-          final preview = ver.length > 60 ? '${ver.substring(0, 60)}...' : ver;
+          final preview =
+              ver.length > 60 ? '${ver.substring(0, 60)}...' : ver;
           return ListTile(
-            leading: CircleAvatar(child: Text('${history.length - i}')),
+            leading: CircleAvatar(child: Text('v${history.length - i}')),
             title: Text(preview),
             subtitle: Text('Version ${history.length - i}'),
             onTap: () {
@@ -572,10 +1017,76 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
     );
   }
 
+  void _showLinkedNotesDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Link Notes (Bi-directional)'),
+        content: const Text('Bi-directional linking feature coming soon'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (widget.focusMode) {
+      return Scaffold(
+        body: GestureDetector(
+          onTap: () => setState(() => _showFormatToolbar = !_showFormatToolbar),
+          child: Column(
+            children: [
+              if (_showFormatToolbar)
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  color: Colors.black12,
+                  child: Row(
+                    children: [
+                      IconButton(
+                          icon: const Icon(Icons.bold), onPressed: () {}),
+                      IconButton(
+                          icon: const Icon(Icons.italic), onPressed: () {}),
+                      IconButton(
+                          icon: const Icon(Icons.underline), onPressed: () {}),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () =>
+                            setState(() => _showFormatToolbar = false),
+                      ),
+                    ],
+                  ),
+                ),
+              Expanded(
+                child: TextField(
+                  controller: _contentCtrl,
+                  maxLines: null,
+                  expands: true,
+                  decoration: const InputDecoration(
+                    hintText: 'Start writing...',
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.all(16),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final scheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        backgroundColor: scheme.surface,
+        foregroundColor: scheme.onSurface,
         title: TextField(
           controller: _titleCtrl,
           decoration: const InputDecoration(
@@ -589,6 +1100,7 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
           tabs: const [
             Tab(icon: Icon(Icons.edit), text: 'Write'),
             Tab(icon: Icon(Icons.draw), text: 'Draw'),
+            Tab(icon: Icon(Icons.extension), text: 'AI'),
             Tab(icon: Icon(Icons.info_outline), text: 'Meta'),
           ],
         ),
@@ -604,6 +1116,11 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
             onPressed: _exportPDF,
           ),
           IconButton(
+            icon: const Icon(Icons.link),
+            tooltip: 'Link Notes',
+            onPressed: _showLinkedNotesDialog,
+          ),
+          IconButton(
             icon: const Icon(Icons.save),
             tooltip: 'Save',
             onPressed: _save,
@@ -613,18 +1130,56 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
       body: TabBarView(
         controller: _tabs,
         children: [
-          Expanded(
-            child: TextField(
-              controller: _contentCtrl,
-              maxLines: null,
-              expands: true,
-              decoration: const InputDecoration(
-                hintText: 'Start writing your note...',
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.all(16),
+          // Write Tab
+          Column(
+            children: [
+              if (_showFormatToolbar)
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.all(8),
+                  child: Row(
+                    children: [
+                      IconButton(
+                          icon: const Icon(Icons.format_bold),
+                          tooltip: 'Bold',
+                          onPressed: () {}),
+                      IconButton(
+                          icon: const Icon(Icons.format_italic),
+                          tooltip: 'Italic',
+                          onPressed: () {}),
+                      IconButton(
+                          icon: const Icon(Icons.format_underlined),
+                          tooltip: 'Underline',
+                          onPressed: () {}),
+                      IconButton(
+                          icon: const Icon(Icons.format_color_text),
+                          tooltip: 'Text Color',
+                          onPressed: () {}),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () =>
+                            setState(() => _showFormatToolbar = false),
+                      ),
+                    ],
+                  ),
+                ),
+              Expanded(
+                child: TextField(
+                  controller: _contentCtrl,
+                  maxLines: null,
+                  expands: true,
+                  onTap: () => setState(() => _showFormatToolbar = true),
+                  decoration: const InputDecoration(
+                    hintText: 'Start writing your note...',
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.all(16),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
+          // Draw Tab
           Column(
             children: [
               Padding(
@@ -653,7 +1208,7 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
                             ? 0
                             : _contentCtrl.selection.baseOffset;
                         _contentCtrl.text = _contentCtrl.text.substring(0, idx) +
-                            '\n[Drawing inserted - ${DateTime.now().toIso8601String()}]\n' +
+                            '\n[Drawing - ${DateTime.now().toIso8601String()}]\n' +
                             _contentCtrl.text.substring(idx);
 
                         _tabs.animateTo(0);
@@ -665,7 +1220,7 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
                         }
                       },
                       icon: const Icon(Icons.check),
-                      label: const Text('Insert to Note'),
+                      label: const Text('Insert'),
                     ),
                   ],
                 ),
@@ -678,6 +1233,65 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
               ),
             ],
           ),
+          // AI Tab
+          ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              const Text('AI Features',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const SizedBox(height: 16),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.summarize),
+                  title: const Text('Generate Summary'),
+                  subtitle:
+                      const Text('Summarize your note in 5 bullet points'),
+                  onTap: _generateAISummary,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.lightbulb),
+                  title: const Text('AI Explanation'),
+                  subtitle:
+                      const Text('Get layman\'s explanation of concepts'),
+                  onTap: () => _generateAIExplanation(_contentCtrl.text),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.auto_fix_high),
+                  title: const Text('Smart Search'),
+                  subtitle: const Text(
+                      'Search by meaning, not just keywords'),
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text(
+                              'Semantic search coming soon')),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 12),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.image),
+                  title: const Text('OCR from Image'),
+                  subtitle: const Text(
+                      'Convert image text to editable text'),
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('OCR coming soon')),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+          // Meta Tab
           ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -707,6 +1321,29 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
                 ),
               ),
               const SizedBox(height: 20),
+              const Text('Layout',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 6),
+              SegmentedButton<String>(
+                segments: const [
+                  ButtonSegment(
+                    value: 'paged',
+                    label: Text('Paged (A4)'),
+                    icon: Icon(Icons.description),
+                  ),
+                  ButtonSegment(
+                    value: 'infinite',
+                    label: Text('Infinite Canvas'),
+                    icon: Icon(Icons.crop_landscape),
+                  ),
+                ],
+                selected: {_selectedLayoutMode ?? 'paged'},
+                onSelectionChanged: (Set<String> newSelection) {
+                  setState(
+                      () => _selectedLayoutMode = newSelection.first);
+                },
+              ),
+              const SizedBox(height: 20),
               if (widget.existing != null) ...[
                 const Text('Info',
                     style: TextStyle(fontWeight: FontWeight.bold)),
@@ -728,8 +1365,8 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
                 ListTile(
                   leading: const Icon(Icons.history),
                   title: const Text('Versions saved'),
-                  subtitle:
-                      Text('${widget.existing!.history.length} snapshots'),
+                  subtitle: Text(
+                      '${widget.existing!.history.length} snapshots'),
                   dense: true,
                 ),
               ],
