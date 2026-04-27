@@ -73,8 +73,7 @@
             android:authorities="${applicationId}.fileprovider"
             android:exported="false">
             <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
+                android:name="android.support.FILE_PROVIDER_PATHS
         </provider>
 
     </application>
