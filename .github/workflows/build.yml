@@ -24,9 +24,16 @@ jobs:
 
       - run: flutter clean
 
+      # ✅ IMPORTANT FIX (clears broken cache)
+      - run: rm -rf ~/.gradle/caches/
+
       - run: flutter pub get
 
-      - run: flutter build apk --release
+      # ✅ safer build
+      - run: flutter build apk --release --no-tree-shake-icons
+
+      # ✅ check if APK exists (debug step)
+      - run: ls -R build/app/outputs/flutter-apk/
 
       - uses: actions/upload-artifact@v4
         with:
