@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:signature/signature.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
@@ -92,8 +93,7 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-// ==================== MODELS ====================
-
+// MODELS
 class NoteModel {
   String id;
   String title;
@@ -206,8 +206,7 @@ class PDFAnnotation {
       );
 }
 
-// ==================== DASHBOARD ====================
-
+// DASHBOARD
 class NotesDashboard extends StatefulWidget {
   final VoidCallback onToggleTheme;
   final VoidCallback onToggleFocusMode;
@@ -656,8 +655,7 @@ class _NotesDashboardState extends State<NotesDashboard> {
   }
 }
 
-// ==================== COMMAND PALETTE ====================
-
+// COMMAND PALETTE
 class CommandPaletteDelegate extends SearchDelegate {
   final List<NoteModel> notes;
   final Function(NoteModel?) onNoteSelected;
@@ -774,8 +772,7 @@ class CommandPaletteDelegate extends SearchDelegate {
   }
 }
 
-// ==================== EDITOR ====================
-
+// EDITOR
 class Editor extends StatefulWidget {
   final NoteModel? existing;
   final VoidCallback onToggleFocusMode;
@@ -966,10 +963,14 @@ Keep it concise and easy to understand.''';
           pw.Text(plain),
           pw.SizedBox(height: 12),
           pw.Text('Folder: ${_folderCtrl.text}',
-              style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey)),
+              style: pw.TextStyle(
+                  fontSize: 10,
+                  color: PdfColor.fromHex('#999999'))),
           if (_tagsCtrl.text.isNotEmpty)
             pw.Text('Tags: ${_tagsCtrl.text}',
-                style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey)),
+                style: pw.TextStyle(
+                    fontSize: 10,
+                    color: PdfColor.fromHex('#999999'))),
         ],
         footer: (ctx) => pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -1048,11 +1049,11 @@ Keep it concise and easy to understand.''';
                   child: Row(
                     children: [
                       IconButton(
-                          icon: const Icon(Icons.bold), onPressed: () {}),
+                          icon: const Icon(Icons.text_fields), onPressed: () {}),
                       IconButton(
-                          icon: const Icon(Icons.italic), onPressed: () {}),
+                          icon: const Icon(Icons.format_paint), onPressed: () {}),
                       IconButton(
-                          icon: const Icon(Icons.underline), onPressed: () {}),
+                          icon: const Icon(Icons.edit), onPressed: () {}),
                       const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.close),
@@ -1140,20 +1141,20 @@ Keep it concise and easy to understand.''';
                   child: Row(
                     children: [
                       IconButton(
-                          icon: const Icon(Icons.format_bold),
-                          tooltip: 'Bold',
+                          icon: const Icon(Icons.text_fields),
+                          tooltip: 'Text Fields',
                           onPressed: () {}),
                       IconButton(
-                          icon: const Icon(Icons.format_italic),
-                          tooltip: 'Italic',
+                          icon: const Icon(Icons.format_paint),
+                          tooltip: 'Format Paint',
                           onPressed: () {}),
                       IconButton(
-                          icon: const Icon(Icons.format_underlined),
-                          tooltip: 'Underline',
+                          icon: const Icon(Icons.edit),
+                          tooltip: 'Edit',
                           onPressed: () {}),
                       IconButton(
-                          icon: const Icon(Icons.format_color_text),
-                          tooltip: 'Text Color',
+                          icon: const Icon(Icons.palette),
+                          tooltip: 'Color',
                           onPressed: () {}),
                       const Spacer(),
                       IconButton(
@@ -1297,7 +1298,7 @@ Keep it concise and easy to understand.''';
             children: [
               const Text('Folder',
                   style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 6),
+              const SizedBox(heightconst SizedBox(height: 6),
               TextField(
                 controller: _folderCtrl,
                 decoration: InputDecoration(
