@@ -1,4 +1,4 @@
-name: Build APK (Auto Retry)
+name: Smart Build APK
 
 on:
   push:
@@ -25,15 +25,48 @@ jobs:
         with:
           flutter-version: 3.22.0
 
-      - name: Build with infinite retry
+      - name: Fix common Gradle issues
         run: |
-          until flutter build apk --release --split-per-abi --no-tree-shake-icons; do
-            echo "❌ Build failed. Cleaning and retrying..."
+          echo "org.gradle.vfs.watch=false" >> android/gradle.properties
+          sed -i 's/minifyEnabled = true/minifyEnabled = false/g' android/app/build.gradle || true
+          sed -i 's/shrinkResources = true/shrinkResources = false/g' android/app/build.gradle || true
+
+      - name: Smart build loop
+        run: |
+          ATTEMPT=1
+          until [ $ATTEMPT -gt 5 ]
+          do
+            echo "🚀 Attempt $ATTEMPT"
+
             flutter clean
             rm -rf build
             rm -rf android/.gradle
-            sleep 5
+
+            flutter pub get
+
+            # Try normal build
+            flutter build apk --release && break
+
+            echo "⚠️ Normal build failed, trying split-per-abi..."
+
+            flutter build apk --release --split-per-abi && break
+
+            echo "⚠️ Retry with no-tree-shake-icons..."
+
+            flutter build apk --release --no-tree-shake-icons && break
+
+            ATTEMPT=$((ATTEMPT+1))
           done
+
+          if [ $ATTEMPT -gt 5 ]; then
+            echo "❌ Build failed after multiple attempts"
+            exit 1
+          fi
+
+      - name: Find APK
+        run: |
+          echo "Searching APK..."
+          find build -name "*.apk"
 
       - uses: actions/upload-artifact@v4
         with:
