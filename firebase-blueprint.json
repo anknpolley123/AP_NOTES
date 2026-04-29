@@ -1,0 +1,50 @@
+{
+  "entities": {
+    "Note": {
+      "title": "Note",
+      "description": "Represents a single note in the application.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "integer" },
+        "updatedAt": { "type": "integer" },
+        "tags": { 
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "color": { "type": "string" },
+        "pinned": { "type": "boolean" },
+        "folderId": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "collaborators": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["title", "text", "createdAt", "updatedAt", "ownerId"]
+    },
+    "Folder": {
+      "title": "Folder",
+      "description": "Represents a folder for organizing notes.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "createdAt": { "type": "integer" }
+      },
+      "required": ["name", "createdAt"]
+    }
+  },
+  "firestore": {
+    "notes": {
+      "schema": "Note",
+      "description": "Collection of all notes."
+    },
+    "folders": {
+      "schema": "Folder",
+      "description": "Collection of all folders."
+    }
+  }
+}
