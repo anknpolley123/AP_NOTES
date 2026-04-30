@@ -16,40 +16,41 @@ export default function Logo({ className = '', size = 'md' }: LogoProps) {
   return (
     <div className={`relative flex flex-col items-center justify-center ${className}`}>
       <div className={`${sizes[size]} relative flex items-center justify-center`}>
-        {/* Dragon Head Logo - Professional Vector Style */}
+        {/* Stylized Modern Dragon Head Logo */}
         <svg 
           viewBox="0 0 100 100" 
-          className="absolute inset-0 w-full h-full drop-shadow-[0_0_15px_rgba(239,68,68,0.4)]"
+          className="absolute inset-0 w-full h-full drop-shadow-[0_0_20px_rgba(239,68,68,0.5)]"
           fill="none" 
           stroke="currentColor" 
-          strokeWidth="2"
+          strokeWidth="2.5"
         >
-          {/* Main Head Structure */}
+          {/* Main Head Contour - More Sleek */}
           <path 
-            d="M20,50 C20,25 45,20 65,25 Q85,30 85,50 Q85,70 65,75 T25,70 Q20,65 20,50 Z" 
+            d="M15,50 C15,20 40,15 60,20 Q85,25 90,45 Q95,65 70,75 L25,85 Q15,85 15,65 L15,50" 
             className="text-red-600" 
             fill="currentColor" 
-            fillOpacity="0.15" 
+            fillOpacity="0.2" 
           />
-          {/* Eye - Sharp & Intelligent */}
-          <path d="M62,38 Q65,40 68,38" stroke="white" strokeWidth="1.5" />
-          <circle cx="65" cy="42" r="2" fill="white" stroke="none" />
-          
-          {/* Horns / Spikes */}
-          <path d="M45,22 Q50,5 60,15" className="text-red-500" />
-          <path d="M35,30 Q35,15 45,22" className="text-red-500" strokeOpacity="0.5" />
-          
-          {/* Flame - Stylised Pulse */}
+          {/* Sharp Horns */}
+          <path d="M45,18 L40,5 M55,20 L60,8" className="text-red-500" strokeWidth="3" strokeLinecap="round" />
+          {/* Glowing Eye */}
+          <circle cx="65" cy="38" r="2.5" fill="white" className="animate-pulse shadow-white shadow-sm" />
+          {/* Flame from nostrils */}
           <path 
-            d="M85,50 L96,55 M85,53 L94,58" 
-            strokeWidth="3" 
+            d="M90,45 L100,48 M90,50 L98,55" 
+            strokeWidth="3.5" 
             strokeLinecap="round" 
-            className="text-orange-500 animate-pulse" 
+            className="text-orange-500 animate-flicker" 
           />
-          
-          {/* Mouth / Detail */}
-          <path d="M70,55 Q75,65 65,70" className="text-red-800" opacity="0.4" />
+          <style>{`
+            @keyframes flicker {
+              0%, 100% { opacity: 1; transform: scale(1); }
+              50% { opacity: 0.6; transform: scale(0.9); }
+            }
+            .animate-flicker { animation: flicker 0.2s infinite; }
+          `}</style>
         </svg>
+
         
         {/* AP Text - Bold & Futuristic */}
         <div className="relative z-10 flex items-center justify-center pointer-events-none">

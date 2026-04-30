@@ -46,12 +46,18 @@ export default function App() {
     testConnection();
 
     // Handle Auth
+    const authTimeout = setTimeout(() => {
+      setAuthLoading(false);
+    }, 5000); // Max 5s wait for auth
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setAuthLoading(false);
+      clearTimeout(authTimeout);
     });
     return () => {
       clearTimeout(splashTimer);
+      clearTimeout(authTimeout);
       unsubscribe();
     };
   }, []);
