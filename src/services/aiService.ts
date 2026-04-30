@@ -93,17 +93,14 @@ ${promptText}`;
 
 export const generateImage = async (prompt: string): Promise<string> => {
   try {
-    // For image generation, we use the specific Imagen model if available via generateContent 
-    // but usually in this environment it's a specific endpoint. 
-    // Given the previous code used 'gemini-2.5-flash-image', I'll preserve the structure but fix the call.
-    const model = getGenAI().getGenerativeModel({ model: 'gemini-1.5-flash' }); // Fallback pattern
+    const model = getModel();
     const result = await model.generateContent(prompt);
-    const response = await result.response;
+    const response = result.response;
     
     // Check for inlineData in parts
     for (const part of response.candidates?.[0]?.content?.parts || []) {
-      if (part.inlineData) {
-        return `data:image/png;base64,${part.inlineData.data}`;
+      if ((part as any).inlineData) {
+        return `data:image/png;base64,${(part as any).inlineData.data}`;
       }
     }
     throw new Error("No image data found. Ensure image generation is enabled.");
@@ -132,7 +129,7 @@ ${text}`;
 export const autoFormatText = async (text: string): Promise<string> => {
   try {
     const model = getModel();
-    const prompt = `Transform the following messy notes or text into a professional document with clear headers, bullet points, and structure. Use bolding for emphasis. Keep it clean and formatted with Markdown.
+    const prompt = `Transform the following messy notes or text into a professional document with clear headers, bullet points, and structure. Use bolding for emphasis. Keep it clean and formatted.
 
 Text:
 ${text}`;
@@ -208,25 +205,21 @@ export const smartSearch = async (
   try {
     const model = getGenAI().getGenerativeModel({
       model: "gemini-1.5-flash",
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: "array" as any,
-          items: { type: "string" as any }
-        }
-      }
     });
 
     const notesSummary = notes.map(n => `ID: ${n.id}\nTitle: ${n.title}\nContent: ${n.text.substring(0, 100)}...`).join('\n\n');
-    const prompt = `You are an AI search engine for notes. Given the user query and the list of notes below, return a list of JSON IDs of the notes that are most relevant to the query. If no notes match, return an empty array [].
+    const prompt = `You are an AI search engine for notes. Given the user query and the list of notes below, return a JSON array of IDs of the notes that are most relevant to the query. If no notes are relevant, return an empty array.
 
 Query: ${queryText}
 
 Notes:
-${notesSummary}`;
+${notesSummary}
+
+Return ONLY valid JSON array format like: ["id1", "id2"]`;
 
     const result = await model.generateContent(prompt);
-    return JSON.parse(result.response.text() || "[]");
+    const text = result.response.text();
+    return JSON.parse(text || "[]");
   } catch (error) {
     console.error("Smart Search error:", error);
     return [];
@@ -285,24 +278,16 @@ export const recommendFolders = async (
   try {
     const model = getGenAI().getGenerativeModel({
       model: "gemini-1.5-flash",
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: "array" as any,
-          items: {
-            type: "object" as any,
-            properties: {
-              noteId: { type: "string" as any },
-              suggestedFolderName: { type: "string" as any }
-            },
-            required: ["noteId", "suggestedFolderName"]
-          }
-        }
-      }
     });
 
     const notesSummary = notes.map(n => `ID: ${n.id}\nTitle: ${n.title}\nContent: ${n.text.substring(0, 50)}...`).join('\n\n');
-    const prompt = `You are an AI data analyst. I have a list of notes. Analyze them and suggest a logical folder name for each note. Categorize them into 4-6 broad folder names (e.g., Work, Personal, Study, Ideas). Return the result as a JSON array of objects with noteId and suggestedFolderName.
+    const prompt = `You are an AI data analyst. I have a list of notes. Analyze them and suggest a logical folder name for each note. Categorize them into 4-6 broad folder names (e.g., Work, Personal, Study, etc.).
+
+Return ONLY a valid JSON array format like:
+[
+  {"noteId": "123", "suggestedFolderName": "Work"},
+  {"noteId": "456", "suggestedFolderName": "Personal"}
+]
 
 Notes:
 ${notesSummary}`;
