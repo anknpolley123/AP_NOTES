@@ -1,0 +1,8 @@
+# Ensure binary files are not corrupted by line ending transformations
+*.jar binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
