@@ -40,10 +40,12 @@ jobs:
         run: npx cap sync android
 
       - name: Build Android Debug APK
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.13"
           build-root-directory: android
+          cache-disabled: false
+          cache-read-only: false
 
       - name: Execute Gradle Build
         run: |
