@@ -8,9 +8,9 @@ const getGenAI = () => {
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY is not set. Please configure it in your environment.");
     }
-    genAIInstance = new GoogleGenAI(apiKey);
+    genAIInstance = new GoogleGenAI({ apiKey }) as any;
   }
-  return genAIInstance;
+  return genAIInstance as any;
 };
 
 export interface SummaryOptions {
