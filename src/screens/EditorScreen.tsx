@@ -612,7 +612,10 @@ export default function EditorScreen() {
   };
 
   const handleAiAction = async (action: 'summarize' | 'refinement' | 'actions' | 'generate_image' | 'generate_document' | 'auto_format' | 'spell_check' | 'generate_quiz' | 'study_plan') => {
-    if (!text.trim() && action !== 'generate_image' && action !== 'generate_document') return;
+    if (!text.trim() && action !== 'generate_image' && action !== 'generate_document') {
+      alert("Please type something in the note first so the AI has context to work with!");
+      return;
+    }
     
     if (action === 'generate_image') {
       setShowAiMenu(false);
@@ -632,8 +635,8 @@ export default function EditorScreen() {
       return;
     }
 
-    setIsAiProcessing(true);
     setShowAiMenu(false);
+    setIsAiProcessing(true);
     
     try {
       let result = '';

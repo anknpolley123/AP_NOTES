@@ -182,9 +182,15 @@ export default function HomeScreen() {
     
     setIsOrganizing(true);
     try {
+      // Show processing notification if possible or just use button state
       const recommendations = await recommendFolders(allNotesMerged.map(n => ({ id: n.id, title: n.title, text: n.text })));
-      if (recommendations.length > 0) {
-        if (confirm(`AI suggests creating folders and moving ${recommendations.length} notes. Proceed?`)) {
+      
+      if (!recommendations || recommendations.length === 0) {
+        alert("The AI couldn't find a better way to organize these notes yet.");
+        return;
+      }
+
+      if (confirm(`AI suggests creating folders and moving ${recommendations.length} notes. Proceed?`)) {
           const currentFolders = await getFolders();
           for (const rec of recommendations) {
             let folder = currentFolders.find(f => f.name.toLowerCase() === rec.suggestedFolderName.toLowerCase());
@@ -205,7 +211,6 @@ export default function HomeScreen() {
           await loadData();
           alert("Notes magically organized into folders!");
         }
-      }
     } catch (e) {
       console.error(e);
       alert("Failed to organize notes. Please try again.");

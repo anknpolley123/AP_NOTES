@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { 
   FileStack, FileCode, Lock, PenTool, ScanSearch, 
   ChevronRight, ArrowRight, FilePlus, Split, Download,
@@ -7,44 +7,60 @@ import {
 } from 'lucide-react';
 import Layout from '../components/Layout';
 import { useNavigate } from 'react-router-dom';
+import { mergePDFs, splitPDF } from '../services/pdfService';
 
 export default function PdfWorkspaceScreen() {
   const navigate = useNavigate();
+  const mergeInputRef = useRef<HTMLInputElement>(null);
+  const splitInputRef = useRef<HTMLInputElement>(null);
+
+  const handleMergeFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      mergePDFs(e.target.files);
+    }
+  };
+
+  const handleSplitFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      splitPDF(e.target.files[0]);
+    }
+  };
+
   const tools = [
     { 
       id: 'merge', 
       title: 'PDF Manipulation', 
-      desc: 'Professional documents', 
+      desc: 'Merge multiple PDF files into one', 
       icon: <Merge className="w-6 h-6 text-orange-500" />,
-      action: 'Merge / Split' 
+      action: () => mergeInputRef.current?.click()
+    },
+    { 
+      id: 'split', 
+      title: 'PDF Splitter', 
+      desc: 'Extract pages into separate documents', 
+      icon: <Scissors className="w-6 h-6 text-blue-500" />,
+      action: () => splitInputRef.current?.click()
     },
     { 
       id: 'form', 
-      title: 'Form Filling', 
-      desc: 'Professional documents', 
-      icon: <FileCode className="w-6 h-6 text-blue-500" />,
-      action: 'Fill Forms'
-    },
-    { 
-      id: 'sign', 
-      title: 'Secure Sign', 
-      desc: 'Professional documents', 
-      icon: <Lock className="w-6 h-6 text-green-500" />,
-      action: 'Digital Signature'
+      title: 'Form Support', 
+      desc: 'Preview PDF form fields', 
+      icon: <FileCode className="w-6 h-6 text-green-500" />,
+      action: () => alert("Open a PDF in the Editor to use Form Fill tools!")
     },
     { 
       id: 'manage', 
-      title: 'Page Management', 
-      desc: 'Professional documents', 
+      title: 'Note Management', 
+      desc: 'Organize your AI generated notes', 
       icon: <Split className="w-6 h-6 text-purple-500" />,
-      action: 'Organize'
+      action: () => navigate('/')
     },
     { 
       id: 'redact', 
-      title: 'OCR Redact', 
-      desc: 'Professional documents', 
+      title: 'OCR Scanning', 
+      desc: 'Convert physical docs to editable text', 
       icon: <ScanSearch className="w-6 h-6 text-red-500" />,
-      action: 'Sensitive Scan'
+      action: () => navigate('/ocr')
     }
   ];
 
@@ -55,15 +71,31 @@ export default function PdfWorkspaceScreen() {
       hugeText="PDF\nDOCS"
       showBack
     >
+      <input 
+        type="file" 
+        multiple 
+        accept=".pdf" 
+        ref={mergeInputRef} 
+        onChange={handleMergeFiles} 
+        className="hidden" 
+      />
+      <input 
+        type="file" 
+        accept=".pdf" 
+        ref={splitInputRef} 
+        onChange={handleSplitFile} 
+        className="hidden" 
+      />
+
       <div className="flex-1 flex flex-col pt-4">
         {/* Quick Actions Row */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-8">
            {[
-             { icon: <Merge />, label: 'merge', action: () => alert("Select PDFs to merge") },
-             { icon: <Scissors />, label: 'extract', action: () => alert("Select PDF to extract") },
-             { icon: <Lock />, label: 'secure', action: () => alert("Securing document...") },
-             { icon: <PenTool />, label: 'fill', action: () => alert("Form filler tool") },
-             { icon: <ScanSearch />, label: 'scan', action: () => navigate('/ocr') }
+             { icon: <Merge />, label: 'merge', action: () => mergeInputRef.current?.click() },
+             { icon: <Scissors />, label: 'split', action: () => splitInputRef.current?.click() },
+             { icon: <Lock />, label: 'secure', action: () => alert("PDF Securing: Coming soon in PRO version!") },
+             { icon: <PenTool />, label: 'editor', action: () => navigate('/editor/new') },
+             { icon: <ScanSearch />, label: 'ocr', action: () => navigate('/ocr') }
            ].map((item, i) => (
              <div key={i} className="flex flex-col items-center gap-3">
                <div 
@@ -85,6 +117,7 @@ export default function PdfWorkspaceScreen() {
           {tools.map(tool => (
             <div 
               key={tool.id}
+              onClick={tool.action}
               className="bg-[var(--bg-card)] p-6 rounded-[32px] border-2 border-[var(--border-app)] flex items-center justify-between hover:scale-[1.02] transition-all cursor-pointer group"
             >
               <div className="flex items-center gap-5">

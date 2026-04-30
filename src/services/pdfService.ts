@@ -1,5 +1,6 @@
 
 import { jsPDF } from "jspdf";
+import { PDFDocument } from 'pdf-lib';
 import { Note } from "./storage";
 
 export const createPDF = async (text: string, title: string = "Note") => {
@@ -53,6 +54,44 @@ export const createPDF = async (text: string, title: string = "Note") => {
   }
 
   doc.save(`${title.replace(/\s+/g, '_')}_${new Date().getTime()}.pdf`);
+};
+
+export const mergePDFs = async (files: FileList | File[]) => {
+  const mergedPdf = await PDFDocument.create();
+  
+  for (const file of Array.from(files)) {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await PDFDocument.load(arrayBuffer);
+    const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+    copiedPages.forEach((page) => mergedPdf.addPage(page));
+  }
+  
+  const pdfBytes = await mergedPdf.save();
+  const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `Merged_Document_${new Date().getTime()}.pdf`;
+  link.click();
+};
+
+export const splitPDF = async (file: File) => {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await PDFDocument.load(arrayBuffer);
+  const pageCount = pdf.getPageCount();
+  
+  // For demonstration, we split each page into its own PDF
+  for (let i = 0; i < pageCount; i++) {
+    const newPdf = await PDFDocument.create();
+    const [page] = await newPdf.copyPages(pdf, [i]);
+    newPdf.addPage(page);
+    
+    const pdfBytes = await newPdf.save();
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `Split_Page_${i + 1}_${file.name}`;
+    link.click();
+  }
 };
 
 export const exportAllNotesToPDF = (notes: Note[]) => {

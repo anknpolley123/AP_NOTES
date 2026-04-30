@@ -19,8 +19,14 @@ export default function App() {
   const [onboardingDone, setOnboardingDone] = useState(isOnboardingComplete());
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
+    // Show splash for 2.5 seconds
+    const splashTimer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2500);
+
     // Test Firestore connection
     const testConnection = async () => {
       try {
@@ -50,6 +56,43 @@ export default function App() {
     });
     return () => unsubscribe();
   }, []);
+
+  if (showSplash) {
+    return (
+      <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-[1000] overflow-hidden">
+        {/* Animated Background Rings */}
+        <div className="absolute w-[800px] h-[800px] border border-blue-500/10 rounded-full animate-[ping_10s_linear_infinite]" />
+        <div className="absolute w-[600px] h-[600px] border border-blue-500/5 rounded-full animate-[ping_15s_linear_infinite] delay-1000" />
+        
+        <div className="relative flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-1000">
+          <div className="w-48 h-48 bg-slate-900 rounded-[56px] p-6 shadow-[0_0_80px_rgba(37,99,235,0.2)] border border-blue-500/20 group hover:scale-105 transition-transform duration-700">
+            <img src="/dragon_bg.png" alt="AP_NOTES Logo" className="w-full h-full object-contain animate-pulse" />
+          </div>
+          
+          <div className="text-center space-y-2">
+            <h1 className="text-4xl font-black italic tracking-tighter text-white uppercase flex items-center gap-3">
+              AP_NOTES <span className="not-italic text-sm bg-blue-600 text-white px-3 py-1 rounded-xl shadow-lg shadow-blue-500/30">PRO</span>
+            </h1>
+            <p className="text-[10px] font-black text-blue-500 uppercase tracking-[0.6em] opacity-80">Next-Gen AI Workspace</p>
+          </div>
+        </div>
+
+        <div className="absolute bottom-12 flex flex-col items-center gap-4">
+           <div className="w-48 h-1.5 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+              <div className="h-full bg-blue-500 rounded-full animate-[loading_2.5s_ease-in-out_infinite]" style={{ width: '40%' }} />
+           </div>
+           <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Waking Up the Dragon...</span>
+        </div>
+
+        <style>{`
+          @keyframes loading {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(300%); }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   if (!onboardingDone) {
     return <PermissionOnboarding onComplete={() => setOnboardingDone(true)} />;
