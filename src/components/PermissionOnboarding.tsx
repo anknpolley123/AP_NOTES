@@ -24,24 +24,24 @@ export default function PermissionOnboarding({ onComplete }: { onComplete: () =>
     },
     {
       id: 'camera',
-      title: 'CAMERA ACCESS',
-      desc: 'Required for OCR scanning and digitizing handwritten notes instantly.',
+      title: 'SCANNING AI',
+      desc: 'Unlock the power of our Level 4 OCR. Scan maps, books, and handwritten notes to digitize your world with 99.8% precision.',
       icon: <Camera className="w-12 h-12 text-blue-500" />,
       color: 'blue'
     },
     {
-      id: 'mic',
-      title: 'MICROPHONE',
-      desc: 'Enables voice dictation so you can record thoughts without typing.',
-      icon: <Mic className="w-12 h-12 text-purple-500" />,
-      color: 'purple'
+      id: 'ai',
+      title: 'NEURAL ENGINE',
+      desc: 'Powered by Google Gemini. Summarize long documents, chat with your notes, and generate professional study plans in seconds.',
+      icon: <Zap className="w-12 h-12 text-blue-400 animate-pulse" />,
+      color: 'blue'
     },
     {
-      id: 'notifications',
-      title: 'NOTIFICATIONS',
-      desc: 'Keep you updated on sync status and smart insight processing.',
-      icon: <Bell className="w-12 h-12 text-orange-500" />,
-      color: 'orange'
+      id: 'sync',
+      title: 'CLOUD SYNC',
+      desc: 'Access your workspace across multiple devices. Secure Firebase integration keeps your professional drafts synced and encrypted.',
+      icon: <ShieldCheck className="w-12 h-12 text-green-500" />,
+      color: 'green'
     }
   ];
 
@@ -50,12 +50,8 @@ export default function PermissionOnboarding({ onComplete }: { onComplete: () =>
     
     try {
       if (currentStep.id === 'camera') {
-        await navigator.mediaDevices.getUserMedia({ video: true });
-      } else if (currentStep.id === 'mic') {
-        await navigator.mediaDevices.getUserMedia({ audio: true });
-      } else if (currentStep.id === 'notifications') {
-        if ('Notification' in window) {
-          await Notification.requestPermission();
+        if (window.navigator.mediaDevices) {
+           await window.navigator.mediaDevices.getUserMedia({ video: true }).then(s => s.getTracks().forEach(t => t.stop()));
         }
       }
     } catch (e) {

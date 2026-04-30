@@ -17,7 +17,7 @@ import { doc, getDocFromServer } from 'firebase/firestore';
 import { Bot, Zap } from 'lucide-react';
 
 export default function App() {
-  const [onboardingDone, setOnboardingDone] = useState(true); 
+  const [onboardingDone, setOnboardingDone] = useState(isOnboardingComplete()); 
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
