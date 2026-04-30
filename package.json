@@ -27,6 +27,7 @@
     "@tensorflow/tfjs": "^4.22.0",
     "@types/d3": "^7.4.3",
     "@types/react-signature-canvas": "^1.0.7",
+    "@vitejs/plugin-legacy": "^8.0.1",
     "@vitejs/plugin-react": "^5.0.4",
     "chart.js": "^4.5.1",
     "d3": "^7.9.0",
@@ -50,6 +51,7 @@
     "react-router-dom": "^7.14.2",
     "react-signature-canvas": "^1.1.0-alpha.2",
     "rehype-raw": "^7.0.0",
+    "terser": "^5.46.2",
     "vite": "^6.2.3",
     "vite-plugin-pwa": "^1.2.0",
     "xlsx": "^0.18.5"

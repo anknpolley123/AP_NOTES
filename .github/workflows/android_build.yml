@@ -43,29 +43,38 @@ jobs:
 
       - name: Capacitor Sync
         run: |
+          npm run build
+          npx cap copy android
           npx cap sync android
-          # Ensure android project is in a clean state
-          cd android
-          rm -rf app/build
-          ls -la app/src/main/assets/public/ || echo "Public assets not found"
+          # Verify assets were copied properly
+          echo "Verifying copied assets..."
+          if [ -z "$(ls -A android/app/src/main/assets/public/)" ]; then 
+            echo "CRITICAL: Assets directory is empty! Sync failed."
+            exit 1
+          fi
+          du -sh android/app/src/main/assets/public/
 
       - name: Build Android Debug APK
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: "8.14.3"
+          gradle-version: "8.12"
           cache-overwrite-existing: true
           validate-wrappers: false
 
       - name: Execute Gradle Build
         run: |
           cd android
-          # Force regenerate the wrapper to fix "Invalid or corrupt jarfile"
-          gradle wrapper --gradle-version 8.14.3 --distribution-type all
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon -PminifyEnabled=false
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AP_NOTES_DEBUG_V1.2.4
+          name: AP_NOTES_PRO_V1.2.5_DEBUG
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload Web Assets (Backup)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ap-notes-web-build
+          path: dist/

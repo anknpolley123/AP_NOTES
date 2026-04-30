@@ -11,51 +11,18 @@
   </head>
   <body>
     <div id="root">
-      <div id="preloader" style="background: #020617; position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; color: white; font-family: sans-serif; z-index: 9999;">
-        <div style="text-align: center; padding: 20px;">
-          <div style="font-size: 32px; font-weight: 900; font-style: italic; letter-spacing: -0.05em; margin-bottom: 8px;">AP_NOTES</div>
-          <div style="font-size: 10px; font-weight: 900; letter-spacing: 0.6em; opacity: 0.5; color: #3b82f6; text-transform: uppercase;">Booting_System...</div>
-          <div style="width: 140px; height: 3px; background: #0f172a; margin: 30px auto; border-radius: 2px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
-            <div id="preloader-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #1e40af, #3b82f6); border-radius: 2px; transition: width 0.4s ease;"></div>
-          </div>
-          <div style="font-size: 8px; opacity: 0.3; letter-spacing: 0.2em;">V1.2.4_STABLE_LOADER</div>
+      <div style="background: #020617; position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; color: white; font-family: sans-serif;">
+        <div style="text-align: center;">
+          <div style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">AP_NOTES</div>
+          <div style="font-size: 12px; opacity: 0.5;">INITIALIZING...</div>
         </div>
       </div>
     </div>
     
     <script>
-      // Simulation of loading progress
-      (function() {
-        var bar = document.getElementById('preloader-bar');
-        var progress = 0;
-        var interval = setInterval(function() {
-          if (progress < 90) {
-            progress += Math.random() * 15;
-            if (progress > 90) progress = 90;
-            if (bar) bar.style.width = progress + '%';
-          }
-        }, 400);
-
-        // Safety cleanup: If React doesn't remove this after 25s, it's likely a crash
-        setTimeout(function() {
-          var loader = document.getElementById('preloader');
-          if (loader && loader.parentNode) {
-            console.warn('System: Loader safety timeout triggered');
-            loader.style.transition = 'opacity 0.8s ease';
-            loader.style.opacity = '0';
-            setTimeout(function() { 
-              if(loader.parentNode) loader.parentNode.removeChild(loader); 
-            }, 800);
-          }
-        }, 25000);
-      })();
-
       window.onerror = function(msg, url, line, col, error) {
         console.error('GLOBAL_ERROR:', msg, 'at', url, ':', line, ':', col, error);
         return false;
-      };
-      window.onunhandledrejection = function(event) {
-        console.error('UNHANDLED_REJECTION:', event.reason);
       };
     </script>
     <script type="module" src="/src/main.tsx"></script>
