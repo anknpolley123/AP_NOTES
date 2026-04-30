@@ -28,7 +28,10 @@ jobs:
           cache: 'npm'
 
       - name: Install Dependencies
-        run: npm install
+        run: |
+          npm ci || npm install
+          # Fix for Tailwind Oxide native binding issue in CI
+          npm install @tailwindcss/oxide-linux-x64-gnu
 
       - name: Build Web Application
         run: npm run build
