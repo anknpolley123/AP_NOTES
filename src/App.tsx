@@ -25,18 +25,22 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
-    // Show splash for at least 1.5 seconds
+    // Show splash for at least 2 seconds
     const splashTimer = setTimeout(() => {
       setShowSplash(false);
-    }, 1500);
+    }, 2000);
 
-    // Test Firestore connection
+    // Test Firestore connection (Non-blocking)
     const testConnection = async () => {
       try {
-        await getDocFromServer(doc(db, 'test', 'connection'));
-        console.log("Firestore connection verified.");
+        // Only run test if we are not on a very restricted network or something
+        await Promise.race([
+          getDocFromServer(doc(db, 'test', 'connection')),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
+        ]);
+        console.log("Health check: OK");
       } catch (error) {
-        console.log("Firestore connection test completed.");
+        console.log("Health check: Complete (possibly offline)");
       }
     };
     testConnection();

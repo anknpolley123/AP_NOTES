@@ -10,45 +10,53 @@ export default function Logo({ className = '', size = 'md' }: LogoProps) {
     sm: 'w-8 h-8',
     md: 'w-12 h-12',
     lg: 'w-24 h-24',
-    xl: 'w-32 h-32'
+    xl: 'w-36 h-36'
   };
 
   return (
     <div className={`relative flex flex-col items-center justify-center ${className}`}>
       <div className={`${sizes[size]} relative flex items-center justify-center`}>
-        {/* Stylized Dragon Head Logo */}
+        {/* Dragon Head Logo - Professional Vector Style */}
         <svg 
           viewBox="0 0 100 100" 
-          className="absolute inset-0 w-full h-full text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.6)]"
+          className="absolute inset-0 w-full h-full drop-shadow-[0_0_15px_rgba(239,68,68,0.4)]"
           fill="none" 
           stroke="currentColor" 
-          strokeWidth="2.5"
+          strokeWidth="2"
         >
-          {/* Dragon Head Silhouette */}
+          {/* Main Head Structure */}
           <path 
-            d="M25,45 C25,25 45,15 65,20 C75,22 85,30 85,45 C85,60 75,70 60,75 L30,80 Q20,80 20,65 L25,45" 
+            d="M20,50 C20,25 45,20 65,25 Q85,30 85,50 Q85,70 65,75 T25,70 Q20,65 20,50 Z" 
+            className="text-red-600" 
             fill="currentColor" 
-            fillOpacity="0.2" 
+            fillOpacity="0.15" 
           />
-          {/* Eye */}
-          <circle cx="65" cy="35" r="3" fill="currentColor" stroke="none" />
-          {/* Horns/Spikes */}
-          <path d="M50,18 L45,5 M60,18 L65,8" strokeWidth="2" />
-          {/* Small flame coming from nose/mouth area at the front */}
+          {/* Eye - Sharp & Intelligent */}
+          <path d="M62,38 Q65,40 68,38" stroke="white" strokeWidth="1.5" />
+          <circle cx="65" cy="42" r="2" fill="white" stroke="none" />
+          
+          {/* Horns / Spikes */}
+          <path d="M45,22 Q50,5 60,15" className="text-red-500" />
+          <path d="M35,30 Q35,15 45,22" className="text-red-500" strokeOpacity="0.5" />
+          
+          {/* Flame - Stylised Pulse */}
           <path 
-            d="M85,45 L98,48 M85,48 L94,52" 
+            d="M85,50 L96,55 M85,53 L94,58" 
             strokeWidth="3" 
             strokeLinecap="round" 
-            className="animate-pulse text-orange-500" 
+            className="text-orange-500 animate-pulse" 
           />
-          {/* Lower Jaw Detail */}
-          <path d="M85,45 L75,55" opacity="0.6" />
+          
+          {/* Mouth / Detail */}
+          <path d="M70,55 Q75,65 65,70" className="text-red-800" opacity="0.4" />
         </svg>
         
-        {/* AP Text */}
-        <span className="relative z-10 font-black italic tracking-tighter text-white drop-shadow-lg" style={{ fontSize: size === 'xl' ? '2.5rem' : '1.2rem' }}>
-          AP
-        </span>
+        {/* AP Text - Bold & Futuristic */}
+        <div className="relative z-10 flex items-center justify-center pointer-events-none">
+          <span className="font-black italic tracking-tighter text-white text-shadow-xl" style={{ fontSize: size === 'xl' ? '2.8rem' : '1.3rem' }}>
+            AP
+          </span>
+        </div>
       </div>
       
       {size === 'xl' && (
