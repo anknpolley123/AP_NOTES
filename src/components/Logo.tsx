@@ -16,29 +16,30 @@ export default function Logo({ className = '', size = 'md' }: LogoProps) {
   return (
     <div className={`relative flex flex-col items-center justify-center ${className}`}>
       <div className={`${sizes[size]} relative flex items-center justify-center`}>
-        {/* Stylized Modern Dragon Head Logo */}
+        {/* Futuristic Dragon Emblem */}
         <svg 
           viewBox="0 0 100 100" 
           className="absolute inset-0 w-full h-full drop-shadow-[0_0_20px_rgba(239,68,68,0.5)]"
           fill="none" 
           stroke="currentColor" 
-          strokeWidth="2.5"
+          strokeWidth="3"
         >
-          {/* Main Head Contour - More Sleek */}
+          {/* Aerodynamic Dragon Head */}
           <path 
-            d="M15,50 C15,20 40,15 60,20 Q85,25 90,45 Q95,65 70,75 L25,85 Q15,85 15,65 L15,50" 
+            d="M15,50 C15,20 45,15 65,22 Q85,28 90,45 T70,75 L25,85 Q15,85 15,65 Z" 
             className="text-red-600" 
             fill="currentColor" 
-            fillOpacity="0.2" 
+            fillOpacity="0.25" 
           />
-          {/* Sharp Horns */}
-          <path d="M45,18 L40,5 M55,20 L60,8" className="text-red-500" strokeWidth="3" strokeLinecap="round" />
-          {/* Glowing Eye */}
-          <circle cx="65" cy="38" r="2.5" fill="white" className="animate-pulse shadow-white shadow-sm" />
-          {/* Flame from nostrils */}
+          {/* Carbon Fiber Horns */}
+          <path d="M48,18 L45,4 M60,20 L65,8" className="text-red-500" strokeWidth="4" strokeLinecap="round" />
+          {/* Cyber Eye */}
+          <circle cx="68" cy="40" r="2" fill="white" className="animate-pulse" />
+          
+          {/* Plasma Flare */}
           <path 
-            d="M90,45 L100,48 M90,50 L98,55" 
-            strokeWidth="3.5" 
+            d="M90,45 L100,48 M90,48 L98,54" 
+            strokeWidth="4" 
             strokeLinecap="round" 
             className="text-orange-500 animate-pulse" 
           />

@@ -27,41 +27,42 @@ export default function App() {
   useEffect(() => {
     // Show splash for at least 2 seconds
     const splashTimer = setTimeout(() => {
+      console.log("App: Splash timer finished");
       setShowSplash(false);
-    }, 2000);
+    }, 4500); // 4.5s splash to give time for UI to settle
 
     // Test Firestore connection (Non-blocking)
     const testConnection = async () => {
       try {
-        // Only run test if we are not on a very restricted network or something
+        console.log("App: Testing DB connection...");
         await Promise.race([
-          getDocFromServer(doc(db, 'test', 'connection')),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
+          getDocFromServer(doc(db, "test", "connection")),
+          new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 2000))
         ]);
-        console.log("Health check: OK");
+        console.log("App: Auth & DB link OK");
       } catch (error) {
-        console.log("Health check: Complete (possibly offline)");
+        console.log("App: DB Check complete (possibly offline/restricted)");
       }
     };
     testConnection();
 
     // Handle Auth
-    console.log("App: Initializing Auth listener...");
     const authTimeout = setTimeout(() => {
-      console.warn("App: Auth timeout reached, forcing loading false");
+      console.warn("App: Auth timeout reached, forcing entry");
       setAuthLoading(false);
-    }, 6000); // 6s wait for auth
+    }, 7000); 
 
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      console.log("App: Auth state changed:", currentUser ? "User logged in" : "No user");
+      console.log("App: Auth state changed:", currentUser ? "User detected" : "Guest mode");
       setUser(currentUser);
       setAuthLoading(false);
       clearTimeout(authTimeout);
     }, (error) => {
-      console.error("App: Auth error:", error);
+      console.error("App: Auth state error:", error);
       setAuthLoading(false);
       clearTimeout(authTimeout);
     });
+    
     return () => {
       clearTimeout(splashTimer);
       clearTimeout(authTimeout);
@@ -71,28 +72,39 @@ export default function App() {
 
   if (showSplash) {
     return (
-      <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-[1000] overflow-hidden p-8 gap-10 text-center">
+      <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-[1000] overflow-hidden p-8 gap-10 text-center select-none">
         <Logo size="xl" />
         
         <div className="space-y-4">
-          <h1 className="text-5xl font-black italic tracking-tighter text-white uppercase flex items-center justify-center gap-4">
+          <h1 className="text-5xl font-black italic tracking-tighter text-white uppercase flex items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
             AP_NOTES
           </h1>
-          <p className="text-sm font-black text-blue-500 uppercase tracking-[0.8em] opacity-80 pl-[0.8em]">AI_WORKSPACE</p>
+          <p className="text-sm font-black text-blue-500 uppercase tracking-[0.8em] opacity-80 pl-[0.8em] animate-in fade-in duration-1000 delay-300">AI_WORKSPACE</p>
         </div>
 
-        <div className="mt-10 flex flex-col items-center gap-6">
-           <div className="w-60 h-1.5 bg-slate-900 rounded-full overflow-hidden border border-white/5">
-              <div className="h-full bg-blue-500 rounded-full animate-[loading_2s_ease-in-out_infinite]" />
+        <div className="mt-10 flex flex-col items-center gap-8">
+           <div className="w-64 h-1.5 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+              <div className="h-full bg-blue-500 rounded-full animate-[loading_3s_ease-in-out_infinite]" />
            </div>
-           <div className="flex flex-col items-center gap-1">
+           
+           <div className="flex flex-col items-center gap-2">
              <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] pl-[0.4em]">System Core v1.2.4_Stable</span>
+             <span className="text-[9px] font-bold text-slate-700 uppercase tracking-[0.2em] animate-pulse">Initializing Neural Engine...</span>
            </div>
         </div>
+
+        {/* Fail-safe button after a few seconds */}
+        <button 
+          onClick={() => setShowSplash(false)}
+          className="absolute bottom-12 text-[10px] font-black text-slate-700 uppercase tracking-widest hover:text-blue-500 transition-colors py-2 px-4 border border-white/5 rounded-full"
+        >
+          Skip Initialization
+        </button>
 
         <style>{`
           @keyframes loading {
             0% { transform: translateX(-100%); }
+            50% { transform: translateX(0%); }
             100% { transform: translateX(200%); }
           }
         `}</style>
