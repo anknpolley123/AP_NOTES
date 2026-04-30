@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Camera, Mic, Bell, ShieldCheck, ArrowRight, Zap } from 'lucide-react';
 import { setOnboardingComplete } from '../services/storage';
+import Logo from './Logo';
 
 interface PermissionStep {
   id: string;
@@ -17,9 +18,9 @@ export default function PermissionOnboarding({ onComplete }: { onComplete: () =>
   const steps: PermissionStep[] = [
     {
       id: 'intro',
-      title: 'AP_NOTES SETUP',
-      desc: 'To provide a seamless note-taking experience, we need to configure your device permissions.',
-      icon: <div className="text-blue-500 font-black text-2xl italic">NOTES</div>,
+      title: 'AP_NOTES PRO',
+      desc: 'To provide a professional workspace experience, we need to initialize your neural engine and cloud sync.',
+      icon: <Logo size="xl" />,
       color: 'blue'
     },
     {

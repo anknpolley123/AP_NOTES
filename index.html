@@ -12,11 +12,13 @@
   <body>
     <div id="root">
       <div style="background: #020617; position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #2563eb; font-family: -apple-system, system-ui, sans-serif; gap: 40px; text-align: center; padding: 40px;">
-        <div style="position: relative;">
-          <div style="width: 120px; height: 120px; border: 6px solid #2563eb; border-radius: 40px; display: flex; align-items: center; justify-content: center; font-size: 60px; font-weight: 900; font-style: italic; box-shadow: 0 0 60px rgba(37, 99, 235, 0.4); animation: pulse 2s infinite;">AP</div>
-          <div style="position: absolute; top: -10px; right: -10px; width: 30px; height: 30px; background: #2563eb; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m13 2-2 10h8l-2 10"></path></svg>
-          </div>
+        <div style="position: relative; width: 140px; height: 140px; display: flex; items-center; justify-content: center;">
+          <svg viewBox="0 0 100 100" style="position: absolute; inset: 0; width: 100%; height: 100%; color: #ef4444; filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.4));" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M70,30 C80,30 85,40 85,50 C85,60 75,65 65,65 L40,65 C30,65 20,55 20,40 C20,25 30,15 45,15 C60,15 70,25 70,30 Z" fill="currentColor" fill-opacity="0.1" />
+            <path d="M85,50 L95,55" stroke-width="4" style="animation: flicker 0.2s infinite;" />
+            <path d="M20,40 Q15,60 30,80 Q45,100 70,85" />
+          </svg>
+          <div style="position: relative; z-index: 10; font-size: 56px; font-weight: 900; font-style: italic; color: #ffffff; letter-spacing: -0.05em; display: flex; align-items: center; justify-content: center; height: 100%;">AP</div>
         </div>
         <div>
           <div style="font-size: 56px; font-weight: 900; font-style: italic; letter-spacing: -0.05em; margin-bottom: 8px; color: #ffffff;">AP_NOTES</div>
@@ -46,6 +48,10 @@
         @keyframes fadeInOut {
           0%, 100% { opacity: 0.5; }
           50% { opacity: 1; }
+        }
+        @keyframes flicker {
+          0%, 100% { opacity: 1; transform: translateX(0); }
+          50% { opacity: 0.8; transform: translateX(2px); }
         }
       </style>
     </div>

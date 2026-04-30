@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import Layout from '../components/Layout';
 import DiagnosticsOverlay from '../components/DiagnosticsOverlay';
+import Logo from '../components/Logo';
 
 export default function SettingsScreen() {
   const navigate = useNavigate();
@@ -246,9 +247,10 @@ export default function SettingsScreen() {
                </button>
              </div>
           </div>
-          <div className="text-center mt-6 py-4">
+          <div className="text-center mt-6 py-4 flex flex-col items-center">
+             <Logo size="md" className="mb-4 opacity-50 grayscale hover:grayscale-0 transition-all" />
              <div className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.3em] opacity-40">Built with Gemini AI & Capacitor</div>
-             <div className="text-[8px] text-[var(--text-muted)] mt-1 uppercase font-bold tracking-widest italic opacity-30">© 2026 AP Notes OCR Pro</div>
+             <div className="text-[8px] text-[var(--text-muted)] mt-1 uppercase font-bold tracking-widest italic opacity-30">© 2026 AP Notes Pro</div>
           </div>
         </section>
       </div>

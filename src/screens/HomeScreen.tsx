@@ -17,6 +17,8 @@ import { auth, db, loginWithGoogle } from '../services/firebaseService';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 
+import Logo from '../components/Logo';
+
 export default function HomeScreen() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [cloudNotes, setCloudNotes] = useState<Note[]>([]);
@@ -312,9 +314,7 @@ export default function HomeScreen() {
           />
           <div className="fixed top-0 left-0 bottom-0 w-[85%] max-w-[320px] bg-[var(--bg-app)] z-[101] shadow-2xl animate-in slide-in-from-left duration-300 flex flex-col">
             <div className="p-8 flex items-center justify-between">
-               <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center p-3 text-white font-black text-xl italic shadow-xl shadow-blue-500/20">
-                  <Zap className="w-8 h-8" strokeWidth={3} />
-               </div>
+               <Logo size="md" className="cursor-pointer" />
                <button onClick={() => navigate('/settings')} className="p-3 text-[var(--text-muted)] hover:bg-slate-800 rounded-2xl relative group">
                   <Settings className="w-8 h-8" />
                   <div className="absolute top-2 right-2 w-3 h-3 bg-blue-500 rounded-full animate-pulse border-2 border-slate-900" />
