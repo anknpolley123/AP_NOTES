@@ -54,28 +54,28 @@ export default function Layout({ children, title, subtitle, showBack, actions, h
 
         {/* Header Content */}
         <header className={`relative z-20 px-8 pt-4 pb-2 ${window.Capacitor ? 'pt-[var(--safe-top)]' : ''}`}>
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
               {leftAction ? leftAction : showBack && (
                 <button 
                   onClick={() => navigate(-1)}
-                  className="p-1 -ml-1 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
+                  className="p-2 -ml-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
                   id="back-button"
                 >
-                  <ChevronLeft className="w-6 h-6" />
+                  <ChevronLeft className="w-7 h-7" />
                 </button>
               )}
-              <div className="flex items-center gap-3 text-left">
+              <div className="flex items-center gap-4 text-left">
                 {!leftAction && !showBack && (
-                  <div className="w-10 h-10 overflow-hidden rounded-xl bg-slate-900 p-1.5 flex items-center justify-center shadow-[0_5px_15px_rgba(37,99,235,0.4)] border border-blue-500/50 group hover:scale-105 transition-transform cursor-pointer">
-                    <div className="text-blue-500 font-black text-[10px] italic">AP</div>
+                  <div className="w-12 h-12 overflow-hidden rounded-2xl bg-slate-900 p-2 flex items-center justify-center shadow-[0_8px_20px_rgba(37,99,235,0.4)] border border-blue-500/50 group hover:scale-105 transition-transform cursor-pointer">
+                    <div className="text-blue-500 font-black text-xs italic">AP</div>
                   </div>
                 )}
                 <div>
-                  <h1 className="text-[20px] font-black tracking-tighter text-blue-500 uppercase italic leading-none" id="page-title">
-                    AP_NOTES <span className="not-italic text-[10px] bg-blue-500 text-white px-2 py-0.5 rounded-md align-middle shadow-lg shadow-blue-500/30">PRO</span>
+                  <h1 className="text-[24px] font-black tracking-tighter text-blue-500 uppercase italic leading-none" id="page-title">
+                    AP_NOTES <span className="not-italic text-[12px] bg-blue-500 text-white px-3 py-1 rounded-md align-middle shadow-lg shadow-blue-500/30">PRO</span>
                   </h1>
-                  <p className="text-[8px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em] mt-0.5 opacity-60">{title || subtitle || 'Professional Suite'}</p>
+                  <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em] mt-1 opacity-60">{title || subtitle || 'Professional Suite'}</p>
                 </div>
               </div>
             </div>
@@ -110,16 +110,16 @@ export default function Layout({ children, title, subtitle, showBack, actions, h
               <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className={`flex flex-col items-center gap-1 transition-all ${
+                className={`flex flex-col items-center gap-1.5 transition-all ${
                   location.pathname === item.path ? 'text-blue-500 scale-110' : 'text-[var(--text-muted)]'
                 }`}
               >
-                <item.icon className={`w-5 h-5 ${location.pathname === item.path ? 'fill-current/10' : ''}`} />
-                <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
+                <item.icon className={`w-6 h-6 ${location.pathname === item.path ? 'fill-current/10' : ''}`} />
+                <span className="text-[11px] font-black uppercase tracking-widest">{item.label}</span>
                 {location.pathname === item.path && (
                   <motion.div 
                     layoutId="active-navIndicator"
-                    className="w-1 h-1 bg-blue-500 rounded-full mt-1"
+                    className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1"
                   />
                 )}
               </button>

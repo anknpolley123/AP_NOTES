@@ -16,35 +16,24 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDocFromServer } from 'firebase/firestore';
 
 export default function App() {
-  const [onboardingDone, setOnboardingDone] = useState(true); // Default to true as user "didn't ask for permissions/onboarding"
+  const [onboardingDone, setOnboardingDone] = useState(isOnboardingComplete());
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
-    // Show splash for 2.5 seconds
+    // Show splash for at least 2 seconds
     const splashTimer = setTimeout(() => {
       setShowSplash(false);
-    }, 2500);
+    }, 3000);
 
     // Test Firestore connection
     const testConnection = async () => {
       try {
-        // Try reading a dummy public document. If it fails with permission-denied, it might be a config issue.
-        // If it fails with not-found, that's actually a SUCCESS in terms of connection!
         await getDocFromServer(doc(db, 'test', 'connection'));
         console.log("Firestore connection verified.");
       } catch (error) {
-        if(error instanceof Error) {
-          if (error.message.includes('permission-denied')) {
-            console.error("Firebase Permission Denied. Please ensure your firestore.rules are deployed.");
-          } else if (error.message.includes('the client is offline')) {
-            console.error("Firestore connection failed: Client is offline.");
-          } else {
-             // Other errors (like not-found) are generally fine as they confirm we reached the server
-             console.log("Firestore connection test completed (document may not exist, which is fine).");
-          }
-        }
+        console.log("Firestore connection test completed.");
       }
     };
     testConnection();
@@ -54,40 +43,54 @@ export default function App() {
       setUser(currentUser);
       setAuthLoading(false);
     });
-    return () => unsubscribe();
+    return () => {
+      clearTimeout(splashTimer);
+      unsubscribe();
+    };
   }, []);
 
   if (showSplash) {
     return (
-      <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-[1000] overflow-hidden">
-        {/* Animated Background Rings */}
-        <div className="absolute w-[800px] h-[800px] border border-blue-500/10 rounded-full animate-[ping_10s_linear_infinite]" />
-        <div className="absolute w-[600px] h-[600px] border border-blue-500/5 rounded-full animate-[ping_15s_linear_infinite] delay-1000" />
+      <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-[1000] overflow-hidden p-8">
+        {/* Animated Background Rings - Larger */}
+        <div className="absolute w-[1200px] h-[1200px] border border-blue-500/10 rounded-full animate-[ping_10s_linear_infinite]" />
+        <div className="absolute w-[1000px] h-[1000px] border border-blue-500/5 rounded-full animate-[ping_15s_linear_infinite] delay-1000" />
         
-        <div className="relative flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-1000">
-          <div className="w-48 h-48 bg-slate-900 rounded-[56px] p-6 shadow-[0_0_80px_rgba(37,99,235,0.2)] border border-blue-500/20 group hover:scale-105 transition-transform duration-700 flex items-center justify-center overflow-hidden">
-             <div className="text-blue-500 font-extrabold text-6xl italic animate-pulse select-none">Notes</div>
+        <div className="relative flex flex-col items-center gap-10 animate-in fade-in zoom-in duration-1000">
+          <div className="w-56 h-56 bg-slate-900 rounded-[64px] p-8 shadow-[0_0_100px_rgba(37,99,235,0.3)] border-2 border-blue-500/30 flex items-center justify-center overflow-hidden">
+             <div className="text-blue-500 font-black text-8xl italic select-none">AP</div>
           </div>
           
-          <div className="text-center space-y-2">
-            <h1 className="text-4xl font-black italic tracking-tighter text-white uppercase flex items-center gap-3">
-              AP_NOTES <span className="not-italic text-sm bg-blue-600 text-white px-3 py-1 rounded-xl shadow-lg shadow-blue-500/30">PRO</span>
+          <div className="text-center space-y-4">
+            <h1 className="text-5xl font-black italic tracking-tighter text-white uppercase flex items-center justify-center gap-4">
+              AP_NOTES <span className="not-italic text-sm bg-blue-600 text-white px-4 py-1.5 rounded-2xl shadow-xl shadow-blue-500/40">PRO</span>
             </h1>
-            <p className="text-xs font-black text-blue-500 uppercase tracking-[0.6em] opacity-80">Next-Gen AI Workspace</p>
+            <p className="text-sm font-black text-blue-500 uppercase tracking-[0.8em] opacity-80 pl-[0.8em]">Next-Gen AI Workspace</p>
           </div>
         </div>
 
-        <div className="absolute bottom-12 flex flex-col items-center gap-4">
-           <div className="w-48 h-1.5 bg-slate-900 rounded-full overflow-hidden border border-white/5">
-              <div className="h-full bg-blue-500 rounded-full animate-[loading_2.5s_ease-in-out_infinite]" style={{ width: '40%' }} />
+        <div className="absolute bottom-20 flex flex-col items-center gap-6">
+           <div className="w-64 h-2 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+              <div className="h-full bg-blue-500 rounded-full animate-[loading_2s_ease-in-out_infinite]" />
            </div>
-           <span className="text-xs font-black text-slate-600 uppercase tracking-widest">Waking Up the Dragon...</span>
+           <div className="flex flex-col items-center gap-1">
+             <span className="text-sm font-black text-slate-400 uppercase tracking-[0.3em] pl-[0.3em]">Waking Up the Dragon</span>
+             <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Powering Up Neural Engine...</span>
+           </div>
         </div>
+
+        {/* Emergency skip if stuck */}
+        <button 
+          onClick={() => setShowSplash(false)}
+          className="absolute bottom-6 text-[10px] font-bold text-slate-700 uppercase tracking-widest hover:text-slate-500 transition-colors"
+        >
+          Skip Loading
+        </button>
 
         <style>{`
           @keyframes loading {
             0% { transform: translateX(-100%); }
-            100% { transform: translateX(300%); }
+            100% { transform: translateX(200%); }
           }
         `}</style>
       </div>

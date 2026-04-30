@@ -523,10 +523,10 @@ export default function HomeScreen() {
 
         {filteredNotes.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center py-20 text-center">
-             <h2 className="text-[32px] font-black text-[var(--text-main)] opacity-30 uppercase tracking-tighter mb-4 italic">No notes</h2>
-             <p className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-widest max-w-[200px]">
-                Tap the Add button to create a note.
-             </p>
+          <div className="text-[12px] font-black text-[var(--text-main)] uppercase tracking-tighter mb-4 italic">No notes created yet</div>
+          <p className="text-base font-bold text-[var(--text-muted)] uppercase tracking-widest max-w-[240px]">
+            Tap the button below to start your first intelligent workspace.
+          </p>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
@@ -586,20 +586,20 @@ export default function HomeScreen() {
         </div>
       </div>
 
-      <div className="fixed bottom-28 right-8 flex items-center gap-4 z-30">
+      <div className="fixed bottom-32 right-8 flex items-center gap-6 z-30">
         <button 
           onClick={() => navigate('/ocr')}
-          className="bg-[var(--bg-button)] text-[var(--text-main)] w-14 h-14 rounded-[20px] shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all border border-[var(--border-app)]"
+          className="bg-[var(--bg-button)] text-[var(--text-main)] w-16 h-16 rounded-[24px] shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all border border-[var(--border-app)]"
           id="ocr-fab"
         >
-          <CameraIcon className="w-6 h-6 text-blue-500" />
+          <CameraIcon className="w-7 h-7 text-blue-500" />
         </button>
         <button 
           onClick={() => navigate('/editor')}
-          className="bg-blue-600 text-white w-14 h-14 rounded-[20px] shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
+          className="bg-blue-600 text-white w-16 h-16 rounded-[24px] shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
           id="add-fab"
         >
-          <PenLine className="w-6 h-6" />
+          <PenLine className="w-7 h-7" />
         </button>
       </div>
 
