@@ -57,20 +57,23 @@ jobs:
       - name: Build Android Debug APK
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: "8.12"
+          gradle-version: "8.14.3"
           cache-overwrite-existing: true
+          # Skip validation as the binary might be regenerated/modified
           validate-wrappers: false
 
       - name: Execute Gradle Build
         run: |
           cd android
+          # Ensure the wrapper jar exists by regenerating it if needed
+          gradle wrapper --gradle-version 8.14.3 --distribution-type all
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon -PminifyEnabled=false
+          ./gradlew clean assembleDebug --no-daemon -PminifyEnabled=false
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AP_NOTES_PRO_V1.2.5_DEBUG
+          name: AP_NOTES_PRO_V1.2.5_DEBUG_STABLE
           path: android/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload Web Assets (Backup)

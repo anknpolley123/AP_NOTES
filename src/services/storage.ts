@@ -1,4 +1,11 @@
 
+/**
+ * Data Persistence Layer
+ * 
+ * Provides an abstraction for various storage engines.
+ * Currently uses high-performance LocalStorage with support for 
+ * future migration to SQLite or IndexedDB.
+ */
 export interface Note {
   id: string;
   text: string;
@@ -15,12 +22,23 @@ export interface Note {
   tags?: string[];
 }
 
+/**
+ * Persistent Folder structure for hierarchical organization
+ */
 export interface Folder {
   id: string;
   name: string;
   createdAt: number;
 }
 
+/**
+ * Saves a new note to the primary storage shard
+ * @param text - The content of the note
+ * @param title - Display title
+ * @param folderId - Parent folder UID
+ * @param pinned - Priority flag
+ * @param type - Content classification
+ */
 export const saveNote = async (text: string, title: string = "Untitled Note", folderId?: string, pinned: boolean = false, type: Note['type'] = 'note', metadata?: Partial<Note>) => {
   const notesStr = localStorage.getItem('notes');
   const notes: Note[] = notesStr ? JSON.parse(notesStr) : [];

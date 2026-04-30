@@ -13,6 +13,16 @@ import { refineText } from '../services/aiService';
 // Set up pdfjs worker
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
+/**
+ * OCRScreen Component
+ * 
+ * Handles multi-modal input processing including live camera scanning,
+ * gallery uploads, and PDF parsing. Integrates with Gemini AI for text 
+ * refinement and Capacitor for native cross-platform functionality.
+ * 
+ * @version 1.2.5
+ * @stable
+ */
 export default function OCRScreen() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -37,14 +47,49 @@ export default function OCRScreen() {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
 
   useEffect(() => {
-    if (!isEditing && !capturedImage) startCamera();
+    if (!isEditing && !capturedImage) {
+      startCamera();
+    }
     return () => {
       if (stream) {
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach(track => {
+          console.log(`System: Stopping track ${track.label}`);
+          track.stop();
+        });
       }
     };
   }, [isEditing, capturedImage]);
 
+  /**
+   * Initializes system camera stream with environment facing mode
+   */
+  const startCamera = async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setError("Your browser or device does not support camera access.");
+      return;
+    }
+
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: 'environment',
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        } 
+      });
+      setStream(mediaStream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
+    } catch (err) {
+      console.error("Scanner: Camera access failed:", err);
+      setError("LENS_INITIALIZATION_ERROR: Please enable camera permissions in settings.");
+    }
+  };
+
+  /**
+   * Processes uploaded PDF files, converting pages to high-res images
+   */
   const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -93,21 +138,6 @@ export default function OCRScreen() {
       setError("Failed to generate PDF from scan");
     } finally {
       setIsProcessing(false);
-    }
-  };
-
-  const startCamera = async () => {
-    try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' } 
-      });
-      setStream(mediaStream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
-    } catch (err) {
-      console.error("Camera access denied:", err);
-      setError("Camera access denied. Try uploading a file instead.");
     }
   };
 

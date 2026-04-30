@@ -17,6 +17,10 @@ import { doc, getDocFromServer } from 'firebase/firestore';
 import { Bot, Zap } from 'lucide-react';
 
 import Logo from './components/Logo';
+import * as tf from '@tensorflow/tfjs';
+
+// Pre-warm the neural engine
+tf.ready().then(() => console.log("System: Tensor Core initialized"));
 
 export default function App() {
   const [onboardingDone, setOnboardingDone] = useState(isOnboardingComplete()); 
