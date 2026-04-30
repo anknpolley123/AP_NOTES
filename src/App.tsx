@@ -16,7 +16,7 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDocFromServer } from 'firebase/firestore';
 
 export default function App() {
-  const [onboardingDone, setOnboardingDone] = useState(isOnboardingComplete());
+  const [onboardingDone, setOnboardingDone] = useState(true); // Default to true as user "didn't ask for permissions/onboarding"
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
@@ -73,7 +73,7 @@ export default function App() {
             <h1 className="text-4xl font-black italic tracking-tighter text-white uppercase flex items-center gap-3">
               AP_NOTES <span className="not-italic text-sm bg-blue-600 text-white px-3 py-1 rounded-xl shadow-lg shadow-blue-500/30">PRO</span>
             </h1>
-            <p className="text-[10px] font-black text-blue-500 uppercase tracking-[0.6em] opacity-80">Next-Gen AI Workspace</p>
+            <p className="text-xs font-black text-blue-500 uppercase tracking-[0.6em] opacity-80">Next-Gen AI Workspace</p>
           </div>
         </div>
 
@@ -81,7 +81,7 @@ export default function App() {
            <div className="w-48 h-1.5 bg-slate-900 rounded-full overflow-hidden border border-white/5">
               <div className="h-full bg-blue-500 rounded-full animate-[loading_2.5s_ease-in-out_infinite]" style={{ width: '40%' }} />
            </div>
-           <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Waking Up the Dragon...</span>
+           <span className="text-xs font-black text-slate-600 uppercase tracking-widest">Waking Up the Dragon...</span>
         </div>
 
         <style>{`

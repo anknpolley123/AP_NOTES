@@ -1629,7 +1629,9 @@ export default function EditorScreen() {
           pageTemplate === 'dots' ? 'paper-dots' : ''
         }`}>
         <div className="absolute inset-x-0 top-0 h-[300vh] pointer-events-none opacity-[0.02] flex items-start justify-center p-20 pt-40">
-           <img src="/dragon_bg.png" alt="" className="w-full max-w-4xl object-contain grayscale animate-pulse" />
+           <div className="w-full max-w-4xl opacity-[0.03] pointer-events-none select-none flex items-center justify-center py-20">
+            <div className="text-blue-500 font-black text-9xl italic -rotate-12">NOTES</div>
+         </div>
         </div>
 
         {isPreview ? (

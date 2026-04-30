@@ -11,29 +11,6 @@ export default defineConfig(({mode}) => {
     plugins: [
       react(), 
       tailwindcss(),
-      VitePWA({
-        registerType: 'autoUpdate',
-        workbox: {
-          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
-        },
-        manifest: {
-          name: 'AP Notes OCR',
-          short_name: 'AP Notes',
-          description: 'Smart notes app with AI OCR and PDF tools.',
-          theme_color: '#2563eb',
-          background_color: '#020617',
-          display: 'standalone',
-          orientation: 'portrait',
-          icons: [
-            {
-              src: 'dragon_bg.png', // Fallback to what was there or user provided
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'any maskable'
-            }
-          ]
-        }
-      })
     ],
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),

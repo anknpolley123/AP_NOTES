@@ -115,7 +115,7 @@ export default function Layout({ children, title, subtitle, showBack, actions, h
                 }`}
               >
                 <item.icon className={`w-5 h-5 ${location.pathname === item.path ? 'fill-current/10' : ''}`} />
-                <span className="text-[8px] font-black uppercase tracking-widest">{item.label}</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
                 {location.pathname === item.path && (
                   <motion.div 
                     layoutId="active-navIndicator"
