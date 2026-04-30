@@ -312,42 +312,42 @@ export default function HomeScreen() {
           />
           <div className="fixed top-0 left-0 bottom-0 w-[85%] max-w-[320px] bg-[var(--bg-app)] z-[101] shadow-2xl animate-in slide-in-from-left duration-300 flex flex-col">
             <div className="p-8 flex items-center justify-between">
-               <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center p-2 text-white font-black text-xs italic">
-                  AP
+               <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center p-3 text-white font-black text-xl italic shadow-xl shadow-blue-500/20">
+                  <Zap className="w-8 h-8" strokeWidth={3} />
                </div>
-               <button onClick={() => navigate('/settings')} className="p-2 text-[var(--text-muted)] hover:bg-slate-800 rounded-xl relative group">
-                  <Settings className="w-6 h-6" />
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+               <button onClick={() => navigate('/settings')} className="p-3 text-[var(--text-muted)] hover:bg-slate-800 rounded-2xl relative group">
+                  <Settings className="w-8 h-8" />
+                  <div className="absolute top-2 right-2 w-3 h-3 bg-blue-500 rounded-full animate-pulse border-2 border-slate-900" />
                </button>
             </div>
             
-            <div className="px-8 pb-4 mb-4 border-b border-[var(--border-app)]">
-               <div className="bg-blue-600/10 border border-blue-500/20 p-3 rounded-2xl flex items-center justify-between group active:scale-95 cursor-pointer" onClick={() => navigate('/settings')}>
-                  <div className="flex items-center gap-2">
-                     <Sparkles className="w-4 h-4 text-blue-500" />
-                     <span className="text-[10px] font-black uppercase text-blue-500 tracking-widest">Active Plan</span>
+            <div className="px-8 pb-4 mb-6 border-b border-[var(--border-app)]">
+               <div className="bg-blue-600/10 border border-blue-500/20 p-4 rounded-3xl flex items-center justify-between group active:scale-95 cursor-pointer" onClick={() => navigate('/settings')}>
+                  <div className="flex items-center gap-3">
+                     <Sparkles className="w-5 h-5 text-blue-500" />
+                     <span className="text-[12px] font-black uppercase text-blue-500 tracking-widest">Active Plan</span>
                   </div>
-                  <span className="text-[8px] font-black bg-blue-500 text-white px-2 py-0.5 rounded-md uppercase tracking-tighter shadow-lg shadow-blue-500/30">PRO_OCR</span>
+                  <span className="text-[10px] font-black bg-blue-500 text-white px-3 py-1 rounded-lg uppercase tracking-tighter shadow-lg shadow-blue-500/30">PRO_OCR</span>
                </div>
             </div>
             
             <div className="flex-1 px-4 space-y-1">
               <button 
                 onClick={() => { setSelectedFolderId(null); setIsSidebarOpen(false); }}
-                className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all ${!selectedFolderId ? 'bg-blue-600/10 text-blue-500' : 'text-[var(--text-main)]'}`}
+                className={`w-full flex items-center gap-8 p-6 rounded-[32px] transition-all ${!selectedFolderId ? 'bg-blue-600/10 text-blue-500' : 'text-[var(--text-main)]'}`}
               >
-                <FileText className="w-5 h-5" />
-                <span className="font-bold flex-1 text-left">All notes</span>
+                <FileText className="w-8 h-8" />
+                <span className="font-black text-2xl flex-1 text-left uppercase tracking-tight">All notes</span>
               </button>
               
               <button 
                 onClick={() => { window.dispatchEvent(new CustomEvent('open-gemini-chat')); setIsSidebarOpen(false); }}
-                className="w-full flex items-center gap-4 p-4 rounded-2xl text-[var(--text-main)] hover:bg-blue-600/10 transition-all font-bold group"
+                className="w-full flex items-center gap-8 p-6 rounded-[32px] text-[var(--text-main)] hover:bg-blue-600/10 transition-all font-black group"
               >
-                <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500">
-                  <Sparkles className="w-4 h-4 text-blue-500 group-hover:text-white" />
+                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500 transition-colors">
+                  <Sparkles className="w-7 h-7 text-blue-500 group-hover:text-white" />
                 </div>
-                <span className="flex-1 text-left">Ask Google Gemini</span>
+                <span className="flex-1 text-left text-2xl uppercase tracking-tight">Ask Gemini AI</span>
               </button>
 
               <button className="w-full flex items-center gap-4 p-4 rounded-2xl text-[var(--text-main)] opacity-50 cursor-not-allowed">

@@ -52,13 +52,14 @@
   body {
     background-color: var(--bg-app);
     color: var(--text-main);
+    font-size: 18px;
     @apply antialiased transition-colors duration-300;
   }
 }
 
 @layer components {
   .huge-bg-text {
-    @apply fixed top-10 left-[-20px] text-[120px] font-black leading-[0.8] tracking-tighter uppercase pointer-events-none select-none z-0;
+    @apply fixed top-10 left-[-20px] text-[180px] font-black leading-[0.8] tracking-tighter uppercase pointer-events-none select-none z-0;
     color: var(--text-main);
     opacity: 0.03;
   }
@@ -66,7 +67,7 @@
   .app-card {
     background-color: var(--bg-card);
     border-color: var(--border-app);
-    @apply sm:rounded-[48px] sm:border-8 shadow-2xl relative overflow-hidden flex flex-col;
+    @apply rounded-[40px] border-[3px] shadow-2xl relative overflow-hidden flex flex-col;
   }
 
   .paper-lined {

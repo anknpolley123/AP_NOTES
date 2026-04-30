@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { motion } from 'motion/react';
-import { ChevronLeft, Wifi, Battery, Signal, LayoutGrid, Network, Download, Settings, Camera, PenLine } from 'lucide-react';
+import { ChevronLeft, Wifi, Battery, Signal, LayoutGrid, Network, Download, Settings, Camera, PenLine, Zap } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 interface LayoutProps {
@@ -27,11 +27,17 @@ export default function Layout({ children, title, subtitle, showBack, actions, h
   ];
 
   return (
-    <div className="min-h-screen bg-[var(--bg-app)] flex flex-col font-sans overflow-hidden">
+    <div className="min-h-screen bg-slate-950 flex flex-col font-sans overflow-hidden">
       <div className="w-full flex-1 bg-[var(--bg-card)] shadow-2xl relative overflow-hidden flex flex-col transition-colors duration-300">
+        {/* Dynamic Background */}
+        <div className="fixed inset-0 pointer-events-none opacity-[0.05] overflow-hidden -z-10 bg-slate-950">
+          <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-500 rounded-full blur-[200px] -mr-64 -mt-64 animate-pulse" />
+          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-600 rounded-full blur-[150px] -ml-48 -mb-48 animate-pulse duration-[4000ms]" />
+        </div>
+
         {/* Huge Decorative Background Text */}
-        <div className="huge-bg-text">
-          {hugeText || "NOTES\nSCAN"}
+        <div className="huge-bg-text opacity-[0.03] select-none text-[200px]">
+          {hugeText || "AP\nPRO"}
         </div>
 
         {/* Dragon Watermark */}
@@ -53,29 +59,29 @@ export default function Layout({ children, title, subtitle, showBack, actions, h
         )}
 
         {/* Header Content */}
-        <header className={`relative z-20 px-8 pt-4 pb-2 ${window.Capacitor ? 'pt-[var(--safe-top)]' : ''}`}>
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-3">
+        <header className={`relative z-20 px-8 pt-6 pb-4 ${window.Capacitor ? 'pt-[var(--safe-top)]' : ''}`}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-4">
               {leftAction ? leftAction : showBack && (
                 <button 
                   onClick={() => navigate(-1)}
-                  className="p-2 -ml-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
+                  className="p-2 -ml-3 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
                   id="back-button"
                 >
-                  <ChevronLeft className="w-7 h-7" />
+                  <ChevronLeft className="w-8 h-8" />
                 </button>
               )}
-              <div className="flex items-center gap-4 text-left">
+              <div className="flex items-center gap-5 text-left">
                 {!leftAction && !showBack && (
-                  <div className="w-12 h-12 overflow-hidden rounded-2xl bg-slate-900 p-2 flex items-center justify-center shadow-[0_8px_20px_rgba(37,99,235,0.4)] border border-blue-500/50 group hover:scale-105 transition-transform cursor-pointer">
-                    <div className="text-blue-500 font-black text-xs italic">AP</div>
+                  <div className="w-14 h-14 overflow-hidden rounded-2xl bg-slate-900 p-2.5 flex items-center justify-center shadow-[0_10px_25px_rgba(37,99,235,0.4)] border border-blue-500/50 group hover:scale-110 transition-all duration-500 cursor-pointer">
+                    <Zap className="w-8 h-8 text-blue-500" strokeWidth={3} />
                   </div>
                 )}
                 <div>
-                  <h1 className="text-[24px] font-black tracking-tighter text-blue-500 uppercase italic leading-none" id="page-title">
-                    AP_NOTES <span className="not-italic text-[12px] bg-blue-500 text-white px-3 py-1 rounded-md align-middle shadow-lg shadow-blue-500/30">PRO</span>
+                  <h1 className="text-[32px] font-black tracking-tighter text-blue-500 uppercase italic leading-none flex items-center gap-3" id="page-title">
+                    AP_NOTES <span className="not-italic text-[14px] bg-blue-500 text-white px-3 py-1 rounded-lg align-middle shadow-lg shadow-blue-500/30">PRO</span>
                   </h1>
-                  <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em] mt-1 opacity-60">{title || subtitle || 'Professional Suite'}</p>
+                  <p className="text-[12px] font-black text-[var(--text-muted)] uppercase tracking-[0.4em] mt-1.5 opacity-80" id="page-title-sub">{title || subtitle || 'Professional Suite'}</p>
                 </div>
               </div>
             </div>

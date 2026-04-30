@@ -14,18 +14,19 @@ import { isOnboardingComplete } from './services/storage';
 import { auth, db } from './services/firebaseService';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDocFromServer } from 'firebase/firestore';
+import { Bot, Zap } from 'lucide-react';
 
 export default function App() {
-  const [onboardingDone, setOnboardingDone] = useState(isOnboardingComplete());
+  const [onboardingDone, setOnboardingDone] = useState(true); 
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
-    // Show splash for at least 2 seconds
+    // Show splash for at least 1.5 seconds
     const splashTimer = setTimeout(() => {
       setShowSplash(false);
-    }, 3000);
+    }, 1500);
 
     // Test Firestore connection
     const testConnection = async () => {
@@ -57,8 +58,13 @@ export default function App() {
         <div className="absolute w-[1000px] h-[1000px] border border-blue-500/5 rounded-full animate-[ping_15s_linear_infinite] delay-1000" />
         
         <div className="relative flex flex-col items-center gap-10 animate-in fade-in zoom-in duration-1000">
-          <div className="w-56 h-56 bg-slate-900 rounded-[64px] p-8 shadow-[0_0_100px_rgba(37,99,235,0.3)] border-2 border-blue-500/30 flex items-center justify-center overflow-hidden">
-             <div className="text-blue-500 font-black text-8xl italic select-none">AP</div>
+          <div className="w-56 h-56 bg-slate-900 rounded-[64px] p-8 shadow-[0_0_100px_rgba(37,99,235,0.3)] border-2 border-blue-500/30 flex items-center justify-center overflow-hidden group">
+             <div className="relative">
+               <Zap className="w-32 h-32 text-blue-500 animate-pulse" strokeWidth={3} />
+               <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-white font-black text-4xl italic mt-2">AP</span>
+               </div>
+             </div>
           </div>
           
           <div className="text-center space-y-4">
