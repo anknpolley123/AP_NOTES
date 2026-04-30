@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Zap, Shield, Cpu, Activity, CheckCircle2, Server, Globe, Lock } from 'lucide-react';
+import { Zap, Shield, Cpu, Activity, Server, Globe, Lock } from 'lucide-react';
 
 interface DiagnosticsOverlayProps {
   isOpen: boolean;

@@ -1,0 +1,6 @@
+# Professional Workspace Template
+Welcome to AP Notes Pro. This is a default template for your professional drafting.
+- High Resolution Data Structures
+- Neural Linking Engines
+- Level 4 OCR Accuracy
+- Secure Cloud Encryption

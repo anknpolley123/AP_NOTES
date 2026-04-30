@@ -555,7 +555,7 @@ export default function OCRScreen() {
                     </div>
                     <div>
                       <div className="text-xs font-black uppercase tracking-widest">AI Enhance & Open</div>
-                      <div className="text-[10px] font-bold text-blue-100">Fix typos & format with Galaxy AI</div>
+                      <div className="text-[10px] font-bold text-blue-100">Fix typos & format with Gemini Neural Engine</div>
                     </div>
                  </button>
 

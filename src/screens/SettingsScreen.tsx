@@ -176,7 +176,7 @@ export default function SettingsScreen() {
                    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center group-hover:scale-110 transition-transform">
                       <Info className="w-5 h-5 text-slate-400" />
                    </div>
-                   <div className="text-sm font-bold text-[var(--text-main)]">About AP Notes OCR Pro</div>
+                   <div className="text-sm font-bold text-[var(--text-main)]">About AP Notes Pro</div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-[var(--text-muted)]" />
              </div>

@@ -43,14 +43,12 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.13"
-          build-root-directory: android
-          cache-disabled: false
-          cache-read-only: false
+          cache-overwrite-existing: true
 
       - name: Execute Gradle Build
         run: |
           cd android
-          gradle assembleDebug
+          gradle assembleDebug --no-daemon
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4

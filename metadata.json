@@ -1,6 +1,6 @@
 {
-  "name": "AP Notes OCR Pro",
-  "description": "Professional OCR-enabled notes application for Android. Scan, digitize, and organize your study notes with advanced Gemini AI.",
+  "name": "AP Notes Pro",
+  "description": "The ultimate AI-powered professional workspace. Level 4 OCR, Gemini Neural Engine, and seamless Cloud Sync for professional drafting and document management.",
   "requestFramePermissions": [
     "camera",
     "microphone"

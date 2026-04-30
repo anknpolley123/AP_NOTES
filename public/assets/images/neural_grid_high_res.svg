@@ -1,0 +1,14 @@
+<svg width="2000" height="2000" viewBox="0 0 2000 2000" xmlns="http://www.w3.org/1999/xlink">
+  <defs>
+    <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
+      <path d="M 100 0 L 0 0 0 100" fill="none" stroke="gray" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#grid)" />
+  <!-- Complex paths to simulate detail -->
+  <path d="M100,100 L1900,100 L1900,1900 L100,1900 Z" fill="none" stroke="blue" stroke-width="2" />
+  <!-- Repetitive patterns to increase file size slightly and visual density -->
+  <g opacity="0.1">
+    ${Array.from({length: 100}).map((_, i) => `<circle cx="${i * 20}" cy="${i * 20}" r="10" fill="blue" />`).join('')}
+  </g>
+</svg>
