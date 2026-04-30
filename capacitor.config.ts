@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.apnotes.ocr',
-  appName: 'AP Notes OCR',
+  appName: 'AP Notes Pro',
   webDir: 'dist',
   server: {
     androidScheme: 'https'

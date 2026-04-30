@@ -4,12 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import { 
   ChevronRight, Cloud, Smartphone, Lock, FileDown, 
   Settings as SettingsIcon, Info, MessageCircle, RefreshCw,
-  Camera, Mic, Bell, Database, Image, Layers, Twitter
+  Camera, Mic, Bell, Database, Image, Layers, Twitter, Activity
 } from 'lucide-react';
 import Layout from '../components/Layout';
+import DiagnosticsOverlay from '../components/DiagnosticsOverlay';
 
 export default function SettingsScreen() {
   const navigate = useNavigate();
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [toggles, setToggles] = useState({
     syncCloud: true,
     autoSave: true,
@@ -156,6 +158,19 @@ export default function SettingsScreen() {
         <section>
           <h3 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em] mb-3 px-2">Support & Developer</h3>
           <div className="bg-[var(--bg-card)] border border-[var(--border-app)] rounded-3xl overflow-hidden shadow-sm">
+             <div 
+               onClick={() => setShowDiagnostics(true)}
+               className="p-4 flex items-center justify-between border-b border-[var(--border-app)] hover:bg-[var(--bg-button)] transition-colors cursor-pointer group"
+             >
+                <div className="flex items-center gap-3">
+                   <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Activity className="w-5 h-5 text-blue-500" />
+                   </div>
+                   <div className="text-sm font-bold text-[var(--text-main)]">System Diagnostics</div>
+                </div>
+                <div className="text-[8px] font-black text-blue-500 uppercase tracking-widest bg-blue-500/10 px-2 py-1 rounded-md">Run Audit</div>
+             </div>
+
              <div className="p-4 flex items-center justify-between border-b border-[var(--border-app)] hover:bg-[var(--bg-button)] transition-colors cursor-pointer group">
                 <div className="flex items-center gap-3">
                    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -237,6 +252,10 @@ export default function SettingsScreen() {
           </div>
         </section>
       </div>
+      <DiagnosticsOverlay 
+        isOpen={showDiagnostics} 
+        onClose={() => setShowDiagnostics(false)} 
+      />
     </Layout>
   );
 }

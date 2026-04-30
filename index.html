@@ -23,24 +23,28 @@
           <div style="font-size: 16px; font-weight: 900; letter-spacing: 0.8em; opacity: 0.6; color: #2563eb; padding-left: 0.8em;">AI_WORKSPACE</div>
         </div>
         <div style="margin-top: 40px;">
-          <div style="width: 200px; height: 4px; background: #0f172a; border-radius: 2px; overflow: hidden;">
-            <div style="width: 30%; height: 100%; background: #2563eb; border-radius: 2px; animation: loading 3s ease-in-out infinite;"></div>
+          <div style="width: 240px; height: 6px; background: #0f172a; border-radius: 3px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+            <div style="width: 40%; height: 100%; background: linear-gradient(90deg, #1e40af, #2563eb, #1e40af); background-size: 200% 100%; border-radius: 3px; animation: loading 2.5s ease-in-out infinite, gradientMove 2s linear infinite;"></div>
           </div>
-          <div style="margin-top: 15px; font-size: 12px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.3em; animation: fadeInOut 2s infinite;">Loading Neural Engine...</div>
+          <div style="margin-top: 20px; font-size: 10px; font-weight: 900; color: #475569; text-transform: uppercase; letter-spacing: 0.4em; animation: fadeInOut 2s infinite;">System Core v1.2.4_Stable</div>
         </div>
       </div>
       <style>
+        @keyframes gradientMove {
+          0% { background-position: 0% 50%; }
+          100% { background-position: 200% 50%; }
+        }
         @keyframes pulse {
-          0% { transform: scale(1); box-shadow: 0 0 40px rgba(37, 99, 235, 0.3); }
-          50% { transform: scale(1.05); box-shadow: 0 0 80px rgba(37, 99, 235, 0.5); }
-          100% { transform: scale(1); box-shadow: 0 0 40px rgba(37, 99, 235, 0.3); }
+          0% { transform: scale(1); box-shadow: 0 0 40px rgba(37, 99, 235, 0.2); }
+          50% { transform: scale(1.05); box-shadow: 0 0 80px rgba(37, 99, 235, 0.4); }
+          100% { transform: scale(1); box-shadow: 0 0 40px rgba(37, 99, 235, 0.2); }
         }
         @keyframes loading {
           0% { transform: translateX(-100%); }
-          100% { transform: translateX(300%); }
+          100% { transform: translateX(200%); }
         }
         @keyframes fadeInOut {
-          0%, 100% { opacity: 0.4; }
+          0%, 100% { opacity: 0.5; }
           50% { opacity: 1; }
         }
       </style>

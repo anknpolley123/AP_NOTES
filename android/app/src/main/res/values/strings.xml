@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">AP Notes OCR</string>
-    <string name="title_activity_main">AP Notes OCR</string>
+    <string name="app_name">AP Notes Pro</string>
+    <string name="title_activity_main">AP Notes Pro</string>
     <string name="package_name">com.apnotes.ocr</string>
     <string name="custom_url_scheme">com.apnotes.ocr</string>
 </resources>
