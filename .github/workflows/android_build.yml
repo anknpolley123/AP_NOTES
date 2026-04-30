@@ -37,23 +37,29 @@ jobs:
         run: |
           npm run build
           # Verify dist exists and is not empty
-          ls -R dist/
+          if [ ! -d "dist" ]; then echo "dist directory missing!" && exit 1; fi
+          if [ -z "$(ls -A dist)" ]; then echo "dist directory is empty!" && exit 1; fi
+          ls -la dist/
 
       - name: Capacitor Sync
-        run: npx cap sync android
+        run: |
+          npx cap sync android
+          # Verify assets were copied
+          ls -la android/app/src/main/assets/public/ || echo "Public assets not found in android project"
 
       - name: Build Android Debug APK
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.14.3"
           cache-overwrite-existing: true
-          # Skip validation of binary wrapper jar as it's failing in this env
           validate-wrappers: false
 
       - name: Execute Gradle Build
         run: |
           cd android
-          gradle assembleDebug --no-daemon
+          # Try to fix the wrapper if it's used
+          gradle wrapper --gradle-version 8.14.3
+          ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4

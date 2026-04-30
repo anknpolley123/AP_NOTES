@@ -46,12 +46,19 @@ export default function App() {
     testConnection();
 
     // Handle Auth
+    console.log("App: Initializing Auth listener...");
     const authTimeout = setTimeout(() => {
+      console.warn("App: Auth timeout reached, forcing loading false");
       setAuthLoading(false);
-    }, 5000); // Max 5s wait for auth
+    }, 6000); // 6s wait for auth
 
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      console.log("App: Auth state changed:", currentUser ? "User logged in" : "No user");
       setUser(currentUser);
+      setAuthLoading(false);
+      clearTimeout(authTimeout);
+    }, (error) => {
+      console.error("App: Auth error:", error);
       setAuthLoading(false);
       clearTimeout(authTimeout);
     });

@@ -40,15 +40,8 @@ export default function Logo({ className = '', size = 'md' }: LogoProps) {
             d="M90,45 L100,48 M90,50 L98,55" 
             strokeWidth="3.5" 
             strokeLinecap="round" 
-            className="text-orange-500 animate-flicker" 
+            className="text-orange-500 animate-pulse" 
           />
-          <style>{`
-            @keyframes flicker {
-              0%, 100% { opacity: 1; transform: scale(1); }
-              50% { opacity: 0.6; transform: scale(0.9); }
-            }
-            .animate-flicker { animation: flicker 0.2s infinite; }
-          `}</style>
         </svg>
 
         
