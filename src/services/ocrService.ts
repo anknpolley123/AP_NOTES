@@ -1,7 +1,7 @@
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY as string });
+const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
 
 export const recognizeText = async (base64Image: string): Promise<string> => {
   try {
