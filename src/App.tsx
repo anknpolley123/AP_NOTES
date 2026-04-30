@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import HomeScreen from './screens/HomeScreen';
 import EditorScreen from './screens/EditorScreen';
 import OCRScreen from './screens/OCRScreen';
@@ -65,8 +65,8 @@ export default function App() {
         <div className="absolute w-[600px] h-[600px] border border-blue-500/5 rounded-full animate-[ping_15s_linear_infinite] delay-1000" />
         
         <div className="relative flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-1000">
-          <div className="w-48 h-48 bg-slate-900 rounded-[56px] p-6 shadow-[0_0_80px_rgba(37,99,235,0.2)] border border-blue-500/20 group hover:scale-105 transition-transform duration-700">
-            <img src="/dragon_bg.png" alt="AP_NOTES Logo" className="w-full h-full object-contain animate-pulse" />
+          <div className="w-48 h-48 bg-slate-900 rounded-[56px] p-6 shadow-[0_0_80px_rgba(37,99,235,0.2)] border border-blue-500/20 group hover:scale-105 transition-transform duration-700 flex items-center justify-center overflow-hidden">
+             <div className="text-blue-500 font-extrabold text-6xl italic animate-pulse select-none">Notes</div>
           </div>
           
           <div className="text-center space-y-2">

@@ -312,8 +312,8 @@ export default function HomeScreen() {
           />
           <div className="fixed top-0 left-0 bottom-0 w-[85%] max-w-[320px] bg-[var(--bg-app)] z-[101] shadow-2xl animate-in slide-in-from-left duration-300 flex flex-col">
             <div className="p-8 flex items-center justify-between">
-               <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center p-2">
-                  <img src="/dragon_bg.png" alt="" className="w-full h-full object-contain invert brightness-0" />
+               <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center p-2 text-white font-black text-xs italic">
+                  AP
                </div>
                <button onClick={() => navigate('/settings')} className="p-2 text-[var(--text-muted)] hover:bg-slate-800 rounded-xl relative group">
                   <Settings className="w-6 h-6" />
@@ -558,8 +558,8 @@ export default function HomeScreen() {
                  <p className="text-[10px] text-[var(--text-muted)] line-clamp-4 leading-relaxed">
                     {note.text}
                  </p>
-                 <div className="absolute bottom-4 right-4 opacity-5">
-                    <img src="/dragon_bg.png" alt="" className="w-12 h-12 grayscale" />
+                 <div className="absolute bottom-4 right-4 opacity-5 pointer-events-none">
+                    <div className="text-blue-500 font-black text-4xl italic -rotate-12">NOTES</div>
                  </div>
               </div>
             ))}

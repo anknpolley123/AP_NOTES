@@ -35,8 +35,8 @@ export default function Layout({ children, title, subtitle, showBack, actions, h
         </div>
 
         {/* Dragon Watermark */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 opacity-[0.05] pointer-events-none select-none z-0">
-          <img src="/dragon_bg.png" alt="" className="w-full h-full object-contain" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 opacity-[0.03] pointer-events-none select-none z-0 flex items-center justify-center">
+          <div className="text-blue-500 font-black text-6xl italic -rotate-12">NOTES</div>
         </div>
 
         {/* Status Bar simulation - only on web */}
@@ -68,7 +68,7 @@ export default function Layout({ children, title, subtitle, showBack, actions, h
               <div className="flex items-center gap-3 text-left">
                 {!leftAction && !showBack && (
                   <div className="w-10 h-10 overflow-hidden rounded-xl bg-slate-900 p-1.5 flex items-center justify-center shadow-[0_5px_15px_rgba(37,99,235,0.4)] border border-blue-500/50 group hover:scale-105 transition-transform cursor-pointer">
-                    <img src="/dragon_bg.png" alt="Logo" className="w-full h-full object-contain" />
+                    <div className="text-blue-500 font-black text-[10px] italic">AP</div>
                   </div>
                 )}
                 <div>

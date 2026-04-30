@@ -19,7 +19,7 @@ export default function PermissionOnboarding({ onComplete }: { onComplete: () =>
       id: 'intro',
       title: 'AP_NOTES SETUP',
       desc: 'To provide a seamless note-taking experience, we need to configure your device permissions.',
-      icon: <img src="/dragon_bg.png" alt="Logo" className="w-16 h-16 object-contain" />,
+      icon: <div className="text-blue-500 font-black text-2xl italic">NOTES</div>,
       color: 'blue'
     },
     {
