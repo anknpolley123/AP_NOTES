@@ -16,18 +16,33 @@ export default function Logo({ className = '', size = 'md' }: LogoProps) {
   return (
     <div className={`relative flex flex-col items-center justify-center ${className}`}>
       <div className={`${sizes[size]} relative flex items-center justify-center`}>
-        {/* Improved Dragon Silhouette */}
+        {/* Stylized Dragon Head Logo */}
         <svg 
           viewBox="0 0 100 100" 
-          className="absolute inset-0 w-full h-full text-red-500 drop-shadow-[0_0_12px_rgba(239,68,68,0.5)]"
+          className="absolute inset-0 w-full h-full text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.6)]"
           fill="none" 
           stroke="currentColor" 
-          strokeWidth="2"
+          strokeWidth="2.5"
         >
-          <path d="M20,50 Q20,20 50,20 Q80,20 85,45 L95,50 L85,55 Q80,80 50,80 Q20,80 20,50" fill="currentColor" fillOpacity="0.15" />
-          <path d="M85,50 L98,53" strokeWidth="4" strokeLinecap="round" className="animate-pulse" />
-          <path d="M40,20 Q50,5 70,15" strokeWidth="1.5" opacity="0.4" />
-          <path d="M25,75 Q15,85 20,95" strokeWidth="1.5" opacity="0.4" />
+          {/* Dragon Head Silhouette */}
+          <path 
+            d="M25,45 C25,25 45,15 65,20 C75,22 85,30 85,45 C85,60 75,70 60,75 L30,80 Q20,80 20,65 L25,45" 
+            fill="currentColor" 
+            fillOpacity="0.2" 
+          />
+          {/* Eye */}
+          <circle cx="65" cy="35" r="3" fill="currentColor" stroke="none" />
+          {/* Horns/Spikes */}
+          <path d="M50,18 L45,5 M60,18 L65,8" strokeWidth="2" />
+          {/* Small flame coming from nose/mouth area at the front */}
+          <path 
+            d="M85,45 L98,48 M85,48 L94,52" 
+            strokeWidth="3" 
+            strokeLinecap="round" 
+            className="animate-pulse text-orange-500" 
+          />
+          {/* Lower Jaw Detail */}
+          <path d="M85,45 L75,55" opacity="0.6" />
         </svg>
         
         {/* AP Text */}
